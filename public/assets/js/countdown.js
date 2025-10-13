@@ -15,6 +15,7 @@ function getTimeRemaining(endtime) {
 
 function initializeClock(id, endtime) {
   var clock = document.getElementById(id);
+    if(clock){
   var daysSpan = clock.querySelector('.days');
   var hoursSpan = clock.querySelector('.hours');
   var minutesSpan = clock.querySelector('.minutes');
@@ -35,6 +36,7 @@ function initializeClock(id, endtime) {
 
   updateClock();
   var timeinterval = setInterval(updateClock, 1000);
+  }
 }
 
 var deadline = new Date(Date.parse(new Date()) + 30 * 24 * 60 * 60 * 1000);
