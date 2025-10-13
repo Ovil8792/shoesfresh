@@ -11,12 +11,11 @@
 						<div class="row single-slide align-items-center d-flex">
 							<div class="col-lg-5 col-md-6">
 								<div class="banner-content">
-									<h1>Nike New <br>Collection!</h1>
-									<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et
-										dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation.</p>
+									<h1>Bộ sưu tập Nikke mới</h1>
+									<p> Được vinh danh là đôi giày bóng rổ toàn diện nhất 2025 với đệm React kết hợp Zoom Air đem lại độ nảy và ổn định vượt trội, phù hợp cho mọi phong cách thi đấu</p>
 									<div class="add-bag d-flex align-items-center">
-										<a class="add-btn" href=""><span class="lnr lnr-cross"></span></a>
-										<span class="add-text text-uppercase">Add to Bag</span>
+										<a class="add-btn" href="#"><span class="lnr lnr-cross"></span></a>
+										<span class="add-text text-uppercase">Thêm vào giỏ hàng</span>
 									</div>
 								</div>
 							</div>
@@ -62,8 +61,8 @@
 						<div class="f-icon">
 							<img src="{{ asset(url("")) }}/assets/img/features/f-icon1.png" alt="">
 						</div>
-						<h6>Free Delivery</h6>
-						<p>Free Shipping on all order</p>
+						<h6>Miễn phí giao hàng</h6>
+						<p>Sẵn sàng giao hàng trong nội thành</p>
 					</div>
 				</div>
 				<!-- single features -->
@@ -72,8 +71,8 @@
 						<div class="f-icon">
 							<img src="{{ asset(url("")) }}/assets/img/features/f-icon2.png" alt="">
 						</div>
-						<h6>Return Policy</h6>
-						<p>Free Shipping on all order</p>
+						<h6>Chính sách hoàn trả</h6>
+						<p>Hoàn trả sản phẩm với 85% chi phí gốc</p>
 					</div>
 				</div>
 				<!-- single features -->
@@ -82,8 +81,8 @@
 						<div class="f-icon">
 							<img src="{{ asset(url("")) }}/assets/img/features/f-icon3.png" alt="">
 						</div>
-						<h6>24/7 Support</h6>
-						<p>Free Shipping on all order</p>
+						<h6>Hỗ trợ 24/7</h6>
+						<p>Luôn sẵn sàng hỗ trợ khách hàng</p>
 					</div>
 				</div>
 				<!-- single features -->
@@ -92,8 +91,8 @@
 						<div class="f-icon">
 							<img src="{{ asset(url("")) }}/assets/img/features/f-icon4.png" alt="">
 						</div>
-						<h6>Secure Payment</h6>
-						<p>Free Shipping on all order</p>
+						<h6>Chuyển khoản bảo mật</h6>
+						<p>Bảo mật tuyệt đối thông tin thanh toán</p>
 					</div>
 				</div>
 			</div>
