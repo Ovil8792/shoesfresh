@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');//dbname
-            $table->string('slug')->unique()->nullable();//urlname (https://url.abc/url-name)
             $table->string('image')->nullable();
             $table->string('brand')->nullable();
             $table->text('description')->nullable();

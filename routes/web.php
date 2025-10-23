@@ -10,6 +10,7 @@ Route::prefix("/")->group(function(){
 Route::get("/san-pham",[ProductController::class,'products'])->name('products');
 Route::get("/dang-nhap",[AuthController::class,'show'])->name('login');
 Route::get("/gio-hang",[ProductController::class,"cart"])->name("cart");
+Route::get("/san-pham/{id}",[ProductController::class,'productDetail'])->name('product.detail');
 }
 );
 Route::prefix("/admin")->group(function(){
