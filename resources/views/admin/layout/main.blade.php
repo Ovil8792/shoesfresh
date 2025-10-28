@@ -258,7 +258,7 @@
     <!-- Sidebar -->
     <nav class="sidebar">
         <div class="sidebar-header">
-            <a href="#" class="sidebar-brand">
+            <a href="{{ route("admin.dashboard") }}" class="sidebar-brand">
                 <i class="bi bi-building"></i> Admin Panel
             </a>
         </div>
@@ -267,7 +267,19 @@
             <div class="nav-item">
                 <a href="#" class="nav-link">
                     <i class="bi bi-grid"></i>
+                    <span>Doanh thu</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ route("admin.category") }}" class="nav-link">
+                    <i class="bi bi-grid"></i>
                     <span>Danh mục</span>
+                </a>
+            </div>
+            <div class="nav-item">
+                <a href="{{ route("admin.product") }}" class="nav-link">
+                    <i class="bi bi-grid"></i>
+                    <span>Sản phẩm</span>
                 </a>
             </div>
             
