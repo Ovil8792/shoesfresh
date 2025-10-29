@@ -3,6 +3,7 @@
 use App\Http\Controllers\admin\AdminController;
 use App\Http\Controllers\admin\CategoryController;
 use App\Http\Controllers\admin\ProductController as AdminProductController;
+use App\Http\Controllers\admin\HoadonController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -22,5 +23,9 @@ Route::prefix("/admin")->group(function(){
     Route::get("/sua-danh-muc/{id}",[CategoryController::class,"edit"])->name('admin.editcat');
     Route::get("/xoa-danh-muc/{id}",[CategoryController::class,"destroy"])->name('admin.delcat');
     Route::get("/san-pham",[AdminProductController::class,"index"])->name('admin.product');
+    Route::get("/hoa-don",[HoadonController::class,"index"])->name('admin.hoadon');
+    Route::get("/hoa-don/chi-tiet/{id}",[HoadonController::class,"detail"])->name('admin.hoadon.detail');
+    Route::post("/hoa-don/cap-nhat/{id}",[HoadonController::class,"update"])->name('admin.hoadon.update');
+    Route::get("/hoa-don/xoa/{id}",[HoadonController::class,"destroy"])->name('admin.hoadon.delete');
 });
 
