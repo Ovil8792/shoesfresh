@@ -282,6 +282,12 @@
                     <span>Sản phẩm</span>
                 </a>
             </div>
+            <div class="nav-item">
+                <a href="{{ route("admin.hoadon") }}" class="nav-link">
+                    <i class="bi bi-grid"></i>
+                    <span>Hóa đơn</span>
+                </a>
+            </div>
             
 
 
