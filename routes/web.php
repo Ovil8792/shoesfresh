@@ -10,6 +10,7 @@ use App\Http\Controllers\admin\StatisticsController;
 use App\Http\Controllers\admin\OrderController;
 use App\Http\Controllers\admin\UserController;
 use App\Http\Controllers\admin\CommentController;
+use App\Http\Controllers\admin\HoadonController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
@@ -84,7 +85,11 @@ Route::prefix("/admin")->group(function(){
     Route::get("/chi-tiet-binh-luan/{id}",[CommentController::class,"show"])->name('admin.comment.show');
     Route::get("/sua-binh-luan/{id}",[CommentController::class,"edit"])->name('admin.comment.edit');
     Route::put("/binh-luan/{id}",[CommentController::class,"update"])->name('admin.comment.update');
-    Route::get("/xoa-binh-luan/{id}",[CommentController::class,"destroy"])->name('admin.comment.delete');
+    Route::get("/xoa-binh-luan/{id}",[CommentController::class,"destroy"])->name('admin.comment.delete'); 
     
+    Route::get("/hoa-don",[HoadonController::class,"index"])->name('admin.hoadon');
+    Route::get("/hoa-don/chi-tiet/{id}",[HoadonController::class,"detail"])->name('admin.hoadon.detail');
+    Route::post("/hoa-don/cap-nhat/{id}",[HoadonController::class,"update"])->name('admin.hoadon.update');
+    Route::get("/hoa-don/xoa/{id}",[HoadonController::class,"destroy"])->name('admin.hoadon.delete');
 });
 

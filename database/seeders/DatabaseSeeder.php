@@ -5,7 +5,10 @@ namespace Database\Seeders;
 use App\Models\Category;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\Product;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
@@ -49,7 +52,7 @@ class DatabaseSeeder extends Seeder
                 'brand' => 'Adidas',
                 'description' => 'The Adidas Ultraboost 21 is designed to give you more energy return and a smoother ride. It features a Primeknit+ upper for a sock-like fit and Boost midsole for ultimate comfort.',
                 'price' => 18000,
-                'product_id' =>$map['adidas'],
+                'product_id' => $map['adidas'],
                 'color' => 'Black',
                 'size' => '9',
                 'status' => 'Available',
@@ -68,5 +71,35 @@ class DatabaseSeeder extends Seeder
                 'design' => 'Casual',
             ],
         ]);
+
+        // Insert data into trangthaihoadon table without model
+        DB::table('trangthaihoadon')->insert([
+            ['name' => 'Đang xử lý'],
+            ['name' => 'Chưa thanh toán'],
+            ['name' => 'Đã thanh toán'],
+            ['name' => 'Đang giao hàng'],
+            ['name' => 'Hoàn thành'],
+            ['name' => 'Đã hủy'],
+            ['name' => 'Đã hoàn trả'],
+        ]);
+
+        DB::table('phuongthucthanhtoan')->insert([
+            ['name' => 'Tiền mặt'],
+            ['name' => 'VNPay'],
+        ]);
+
+        DB::table('hoadons')->insert([
+            ['user_id' => 0, 'trangthaihoadon_id' => 3, 'phuongthucthanhtoan_id' => 1, 'diachi_id' => 1, 'sanpham_id' => 1, 'soluong' => 1, 'tongtien' => 1],
+            ['user_id' => 0, 'trangthaihoadon_id' => 2, 'phuongthucthanhtoan_id' => 2, 'diachi_id' => 5, 'sanpham_id' => 2, 'soluong' => 5, 'tongtien' => 2],
+        ]);
+
+        // seed users: one admin and 10 sample users
+        User::factory()->create([
+            'name' => 'Admin',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('admin123'),
+        ]);
+
+        User::factory(10)->create();
     }
 }
