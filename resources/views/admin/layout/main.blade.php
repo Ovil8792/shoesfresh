@@ -265,34 +265,65 @@
         
         <div class="sidebar-nav">
             <div class="nav-item">
-                <a href="#" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Doanh thu</span>
+                <a class="nav-link d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#productMenu" role="button" aria-expanded="false" aria-controls="productMenu">
+                    <span class="d-flex align-items-center">
+                        <i class="bi bi-grid"></i>
+                        <span>Quản lý sản phẩm</span>
+                    </span>
+                    <i class="bi bi-chevron-down"></i>
+                </a>
+                <div class="collapse ms-4" id="productMenu">
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-spa-link data-key="category" data-url="{{ route('admin.category') }}">
+                            <span>Danh mục</span>
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-spa-link data-key="product" data-url="{{ route('admin.product') }}">
+                            <span>Sản phẩm</span>
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-spa-link data-key="brand" data-url="{{ route('admin.brand') }}">
+                            <span>Thương hiệu</span>
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-spa-link data-key="color" data-url="{{ route('admin.color') }}">
+                            <span>Màu sắc</span>
+                        </a>
+                    </div>
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" data-spa-link data-key="size" data-url="{{ route('admin.size') }}">
+                            <span>Kích cỡ</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+             <div class="nav-item">
+                <a href="{{ route('admin.statistics') }}" class="nav-link">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Thống kê</span>
                 </a>
             </div>
-            <div class="nav-item">
-                <a href="{{ route("admin.category") }}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Danh mục</span>
+             <div class="nav-item">
+                <a href="{{ route('admin.order') }}" class="nav-link">
+                    <i class="bi bi-cart-check"></i>
+                    <span>Đơn hàng</span>
                 </a>
             </div>
-            <div class="nav-item">
-                <a href="{{ route("admin.product") }}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Sản phẩm</span>
+             <div class="nav-item">
+                <a href="{{ route('admin.user') }}" class="nav-link">
+                    <i class="bi bi-people"></i>
+                    <span>Người dùng</span>
                 </a>
             </div>
-            <div class="nav-item">
-                <a href="{{ route("admin.hoadon") }}" class="nav-link">
-                    <i class="bi bi-grid"></i>
-                    <span>Hóa đơn</span>
+             <div class="nav-item">
+                <a href="{{ route('admin.comment') }}" class="nav-link">
+                    <i class="bi bi-chat-left-text"></i>
+                    <span>Bình luận</span>
                 </a>
             </div>
-            
-
-
-            
-            
         </div>
     </nav>
 
@@ -337,6 +368,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             const sidebar = document.querySelector('.sidebar');
             const mainContent = document.querySelector('.main-content');
+            const contentWrapper = document.querySelector('.content-wrapper');
+            const headerTitle = document.querySelector('.header-title');
+            const productMenu = document.getElementById('productMenu');
             
             // Add mobile menu button if needed
             if (window.innerWidth <= 768) {
@@ -348,6 +382,71 @@
                     sidebar.classList.toggle('show');
                 };
                 document.body.appendChild(mobileMenuBtn);
+            }
+
+            // SPA-like loader for sidebar product menu
+            function setActiveLink(activeEl) {
+                document.querySelectorAll('[data-spa-link]').forEach(a => a.classList.remove('active'));
+                if (activeEl) activeEl.classList.add('active');
+            }
+
+            async function loadSection(url, clickedEl) {
+                if (!url) return;
+                try {
+                    const res = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    const html = await res.text();
+                    // Create a DOM to extract content wrapper from full page
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newWrapper = doc.querySelector('.content-wrapper');
+                    const newHeader = doc.querySelector('.header-title');
+                    if (newWrapper) {
+                        contentWrapper.innerHTML = newWrapper.innerHTML;
+                    } else {
+                        // Fallback: if no wrapper found, inject full HTML
+                        contentWrapper.innerHTML = html;
+                    }
+                    if (newHeader && headerTitle) {
+                        headerTitle.textContent = newHeader.textContent || headerTitle.textContent;
+                    }
+                    // Visual state
+                    if (clickedEl) {
+                        setActiveLink(clickedEl);
+                        // Persist selection
+                        const key = clickedEl.getAttribute('data-key');
+                        if (key) localStorage.setItem('admin_active_product_menu', key);
+                        // Ensure menu is shown
+                        if (productMenu && !productMenu.classList.contains('show')) {
+                            const bsCollapse = new bootstrap.Collapse(productMenu, { toggle: false });
+                            bsCollapse.show();
+                        }
+                    }
+                } catch (e) {
+                    console.error('Load failed', e);
+                }
+            }
+
+            // Handle clicks
+            document.addEventListener('click', function(e) {
+                const a = e.target.closest('[data-spa-link]');
+                if (!a) return;
+                e.preventDefault();
+                const url = a.getAttribute('data-url');
+                loadSection(url, a);
+            });
+
+            // Restore last active
+            const savedKey = localStorage.getItem('admin_active_product_menu');
+            if (savedKey) {
+                const a = document.querySelector(`[data-spa-link][data-key="${savedKey}"]`);
+                if (a) {
+                    // Open collapse and set active, but don't fetch immediately to avoid overriding server render on first load
+                    if (productMenu && !productMenu.classList.contains('show')) {
+                        const bsCollapse = new bootstrap.Collapse(productMenu, { toggle: false });
+                        bsCollapse.show();
+                    }
+                    setActiveLink(a);
+                }
             }
         });
     </script>
