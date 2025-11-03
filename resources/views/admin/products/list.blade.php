@@ -155,7 +155,7 @@
                                 <span class="mb-0 fw-semibol">{{ $item->product_id }}</span>
                            </td>
                            <td class="align-middle text-muted">
-                                <img width="80%" src="{{ $item->image }}">
+                                <img width="60%" src="{{ $item->image }}">
                            </td>
                            <td class="align-middle text-muted">
                                 <span class="mb-0 fw-semibol">{{ number_format($item->price,0,",",".") }} VND</span>

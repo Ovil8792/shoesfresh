@@ -9,9 +9,10 @@ class AuthController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function login(Request $request)
     {
-        //
+        $username = $request->input('username');
+        $password = $request->input('password');
     }
 
     /**
