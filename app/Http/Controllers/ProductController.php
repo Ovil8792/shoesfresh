@@ -19,6 +19,20 @@ class ProductController extends Controller
         $cat = Category::get();
         return view('client.product.list',compact('prod','cat'));
     }
+
+    /**
+     * Display products by category slug.
+     */
+    public function productsByCategory(string $slug)
+    {
+        $category = Category::where('slug', $slug)->firstOrFail();
+        $prod = Product::where('product_id', $category->id)->get();
+
+        return view('client.product.list', [
+            'prod' => $prod,
+            'categoryFilter' => $category,
+        ]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -49,8 +63,8 @@ class ProductController extends Controller
     public function productDetail($id)
     {
         
-        $product = Product::findOrFail($id);
-        $product["category_name"]=Category::findOrFail($product->product_id)->name;
+        $product = Product::with('category')->findOrFail($id);
+        $product["category_name"] = optional($product->category)->name;
     
         return view('client.product.product',compact('product'));
     }

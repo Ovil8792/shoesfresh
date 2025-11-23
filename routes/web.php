@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix("/")->group(function(){
     Route::get('/',[ProductController::class,'home'])->name('home');
 Route::get("/san-pham",[ProductController::class,'products'])->name('products');
+Route::get("/danh-muc/{slug}",[ProductController::class,'productsByCategory'])->name('products.category');
 Route::get("/dang-nhap",[AuthController::class,'show'])->name('login');
 Route::get("/gio-hang",[ProductController::class,"cart"])->name("cart");
 Route::get("/san-pham/{id}",[ProductController::class,'productDetail'])->name('product.detail');
@@ -29,6 +30,13 @@ Route::prefix("/admin")->group(function(){
     Route::get("/sua-danh-muc/{id}",[CategoryController::class,"edit"])->name('admin.editcat');
     Route::get("/xoa-danh-muc/{id}",[CategoryController::class,"destroy"])->name('admin.delcat');
     Route::get("/san-pham",[AdminProductController::class,"index"])->name('admin.product');//product
+    Route::get("/them-san-pham",[AdminProductController::class,"create"])->name('admin.product.create');
+    Route::post("/san-pham",[AdminProductController::class,"store"])->name('admin.product.store');
+    Route::get("/chi-tiet-san-pham/{id}",[AdminProductController::class,"show"])->name('admin.product.show');
+    Route::get("/sua-san-pham/{id}",[AdminProductController::class,"edit"])->name('admin.product.edit');
+    Route::put("/san-pham/{id}",[AdminProductController::class,"update"])->name('admin.product.update');
+    Route::get("/xoa-san-pham/{id}",[AdminProductController::class,"destroy"])->name('admin.product.delete');
+    Route::delete("/san-pham/{id}",[AdminProductController::class,"delete"])->name('admin.product.delete.confirm');
     // brand
     Route::get("/thuong-hieu",[BrandController::class,"index"])->name('admin.brand');
     Route::get("/them-thuong-hieu",[BrandController::class,"create"])->name('admin.brand.create');
