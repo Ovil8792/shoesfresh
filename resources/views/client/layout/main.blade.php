@@ -66,7 +66,15 @@
 								<a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
 								 aria-expanded="false">Danh mục</a>
 								<ul class="dropdown-menu">
-									<li id="category" class="nav-item"></li>
+									@forelse ($cat as $category)
+									<li class="nav-item">
+										<a class="nav-link" href="{{ route('products.category', ['slug' => $category->slug]) }}">{{ $category->name }}</a>
+									</li>
+									@empty
+									<li class="nav-item">
+										<span class="nav-link">Chưa có danh mục</span>
+									</li>
+									@endforelse
 								</ul>
 							</li>
 							<li class="nav-item submenu dropdown">
@@ -184,12 +192,6 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 		</div>
 	</footer>
 	<!-- End footer Area -->
-<script>
-	var category = @json($cat);
-	var catlink = document.getElementById('category');
-	catlink.innerHTML = category.map(cat => `<a class="nav-link" href="#">${cat.name}</a>`).join('');
-
-</script>
 	<script src="{{ asset(url("")) }}/assets/js/vendor/jquery-2.2.4.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
 	 crossorigin="anonymous"></script>
