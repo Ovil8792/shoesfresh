@@ -14,7 +14,6 @@ namespace Symfony\Component\Mailer\Transport\Smtp;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Envelope;
-use Symfony\Component\Mailer\Exception\InvalidArgumentException;
 use Symfony\Component\Mailer\Exception\LogicException;
 use Symfony\Component\Mailer\Exception\TransportException;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
@@ -212,7 +211,7 @@ class SmtpTransport extends AbstractTransport
             }
 
             $envelope = $message->getEnvelope();
-            $this->doMailFromCommand($envelope->getSender()->getEncodedAddress(), $envelope->anyAddressHasUnicodeLocalpart());
+            $this->doMailFromCommand($envelope->getSender()->getEncodedAddress());
             foreach ($envelope->getRecipients() as $recipient) {
                 $this->doRcptToCommand($recipient->getEncodedAddress());
             }
@@ -245,22 +244,19 @@ class SmtpTransport extends AbstractTransport
         }
     }
 
-    protected function serverSupportsSmtpUtf8(): bool
-    {
-        return false;
-    }
-
-    private function doHeloCommand(): void
+    /**
+     * @internal since version 6.1, to be made private in 7.0
+     *
+     * @final since version 6.1, to be made private in 7.0
+     */
+    protected function doHeloCommand(): void
     {
         $this->executeCommand(\sprintf("HELO %s\r\n", $this->domain), [250]);
     }
 
-    private function doMailFromCommand(string $address, bool $smtputf8): void
+    private function doMailFromCommand(string $address): void
     {
-        if ($smtputf8 && !$this->serverSupportsSmtpUtf8()) {
-            throw new InvalidArgumentException('Invalid addresses: non-ASCII characters not supported in local-part of email.');
-        }
-        $this->executeCommand(\sprintf("MAIL FROM:<%s>%s\r\n", $address, $smtputf8 ? ' SMTPUTF8' : ''), [250]);
+        $this->executeCommand(\sprintf("MAIL FROM:<%s>\r\n", $address), [250]);
     }
 
     private function doRcptToCommand(string $address): void
@@ -376,12 +372,15 @@ class SmtpTransport extends AbstractTransport
         $this->restartCounter = 0;
     }
 
-    public function __serialize(): array
+    public function __sleep(): array
     {
         throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
     }
 
-    public function __unserialize(array $data): void
+    /**
+     * @return void
+     */
+    public function __wakeup()
     {
         throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
     }

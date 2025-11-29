@@ -1,30 +1,37 @@
 <?php
 
 namespace App\Http\Controllers\admin;
-
 use App\Http\Controllers\Controller;
+
+use App\Models\Comment;
 use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
     /**
-     * Display a listing of comments.
+     * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return view('admin.comments.list');
+        $keyword = $request->input('keyword');
+        if ($keyword) {
+        $comments = Comment::where('name', 'like', '%' . $keyword . '%')->get();
+        } else {
+        $comments = Comment::all();
+        }
+        return view('admin.comment.index', compact('comments', 'keyword'));
     }
 
     /**
-     * Show the form for creating a new comment.
+     * Show the form for creating a new resource.
      */
     public function create()
     {
-        return view('admin.comments.create');
+        //
     }
 
     /**
-     * Store a newly created comment.
+     * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
@@ -32,35 +39,41 @@ class CommentController extends Controller
     }
 
     /**
-     * Display the specified comment.
+     * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(comment $comment, string $id)
     {
-        return view('admin.comments.show', compact('id'));
+        // cái này
+        $comment = Comment::find($id);
+        return view('admin.comment.detail', compact('comment'));
     }
 
     /**
-     * Show the form for editing the specified comment.
+     * Show the form for editing the specified resource.
      */
     public function edit(string $id)
     {
-        return view('admin.comments.edit', compact('id'));
+        $comment = Comment::find($id);
+        return view('admin.comment.update', compact('comment'));
     }
 
     /**
-     * Update the specified comment.
+     * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Comment $comment, Request $request, string $id)
     {
-        //
+        Comment::find($id)->update([
+           'status' => $request->status,
+        ]);
+        return redirect()->route('comment.index')->with('success', 'Cập nhật thành công');
     }
 
     /**
-     * Remove the specified comment.
+     * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function delete($id)
     {
-        return view('admin.comments.delete', compact('id'));
+        Comment::destroy($id);
+        return redirect()->route('comment.index');
     }
 }
-

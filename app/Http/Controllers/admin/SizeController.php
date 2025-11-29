@@ -1,46 +1,43 @@
-<?php
-
+<?php 
 namespace App\Http\Controllers\admin;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Models\Size;
 class SizeController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(Request $request)
     {
-        return view('admin.sizes.list');
-    }
+        $query = Size::query();
 
-    public function create()
-    {
-        return view('admin.sizes.create');
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        $sizes = $query->orderBy('id', 'desc')->get();
+
+        return view('admin.variant.size.index', compact('sizes'));
     }
 
     public function store(Request $request)
     {
-        // handle create
+        $request->validate([
+            'value' => 'required|numeric|unique:sizes,value',
+        ]);
+
+        Size::create([
+            'value' => $request->value,
+        ]);
+
+        return redirect()->route('product.size.index')->with('success', 'Thêm thành công');
     }
 
-    public function show(string $id)
+    public function destroy($id)
     {
-        return view('admin.sizes.show', compact('id'));
-    }
-
-    public function edit(string $id)
-    {
-        return view('admin.sizes.edit', compact('id'));
-    }
-
-    public function update(Request $request, string $id)
-    {
-        // handle update
-    }
-
-    public function destroy(string $id)
-    {
-        return view('admin.sizes.delete', compact('id'));
+        $size = Size::findOrFail($id);
+        $size->delete();
+        return redirect()->route('product.size.index')->with('success', 'Xóa thành công');
     }
 }
-
-

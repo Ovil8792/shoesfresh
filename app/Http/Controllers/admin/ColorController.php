@@ -1,46 +1,44 @@
-<?php
-
+<?php 
 namespace App\Http\Controllers\admin;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
+use App\Models\Color;
 class ColorController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(request $request)
     {
-        return view('admin.colors.list');
-    }
+        $query = Color::query();
 
-    public function create()
-    {
-        return view('admin.colors.create');
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        $colors = $query->orderBy('id', 'desc')->get();
+
+        return view('admin.variant.color.index', compact('colors'));
     }
 
     public function store(Request $request)
     {
-        // handle create
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'hex_code' => 'required|string|max:7|unique:colors,hex_code',
+        ]);
 
-    public function show(string $id)
-    {
-        return view('admin.colors.show', compact('id'));
-    }
+        Color::create([
+            'name' => $request->name,
+            'hex_code' => $request->hex_code,
+        ]);
 
-    public function edit(string $id)
-    {
-        return view('admin.colors.edit', compact('id'));
+        return redirect()->route('product.color.index')->with('success', 'Thêm thành công');
     }
-
-    public function update(Request $request, string $id)
+    public function destroy($id)
     {
-        // handle update
-    }
-
-    public function destroy(string $id)
-    {
-        return view('admin.colors.delete', compact('id'));
+        $color = Color::findOrFail($id);
+        $color->delete();
+        return redirect()->route('product.color.index')->with('success', 'Xóa thành công');
     }
 }
-
-

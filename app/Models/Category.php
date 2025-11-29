@@ -2,25 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'slug',
-    ];
+    use HasFactory;
+    use SoftDeletes;
+    protected $fillable = ['name', 'slug', 'status'];
 
-    /**
-     * A category has many products.
-     */
-    public function products()
-    {
-        return $this->hasMany(Product::class, 'product_id');
+    public function products() {
+        return $this->hasMany(Product::class);
     }
 }

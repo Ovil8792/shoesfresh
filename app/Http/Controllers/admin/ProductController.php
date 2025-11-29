@@ -3,10 +3,16 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductVariant;
+use App\Models\Color;
+use App\Models\Size;
+use App\Models\Brand;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -16,23 +22,16 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with('category');
-        
-        // Search by ID
-        if ($request->has('search_id') && $request->search_id) {
-            $query->where('id', $request->search_id);
+        $categories = Category::all();
+        $query = Product::with('images', 'category');
+
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
         }
-        
-        // Search by name
-        if ($request->has('search_name') && $request->search_name) {
-            $query->where('name', 'like', '%' . $request->search_name . '%');
-        }
-        
-        $products = $query->get();
-        $totalProducts = Product::count();
-        $avgPrice = Product::avg('price');
-        
-        return view('admin.products.list', compact('products', 'totalProducts', 'avgPrice'));
+
+        $products = $query->orderBy('id', 'desc')->paginate(10);
+
+        return view('admin.product.index', compact('products', 'categories'));
     }
 
     /**
@@ -41,100 +40,100 @@ class ProductController extends Controller
     public function create()
     {
         $categories = Category::all();
-        return view('admin.products.create', compact('categories'));
+        $sizes = Size::all();
+        $colors = Color::all();
+        $brands = Brand::all();
+        return view('admin.product.create', compact('categories', 'sizes', 'colors', 'brands'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
+
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'product_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'brand' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'color' => 'nullable|string|max:255',
-            'size' => 'nullable|string|max:255',
-            'status' => 'nullable|string|max:255',
-            'design' => 'nullable|string|max:255',
-            // Variants
-            'variants' => 'nullable|array',
-            'variants.*.color' => 'nullable|string|max:255',
-            'variants.*.size' => 'nullable|string|max:255',
-            'variants.*.price' => 'nullable|numeric|min:0',
-            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'variants.*.status' => 'nullable|string|max:255',
-            'variants.*.design' => 'nullable|string|max:255',
-        ]);
+        DB::beginTransaction();
+        try {
+            // upload image
+            $imagePath = null;
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = time() . '_' . $image->getClientOriginalName();
+                $image->move(public_path('uploads/products/'), $imageName);
+                $imagePath = 'uploads/products/' . $imageName;
+            }
 
-        // Handle main product image upload
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
-        }
-
-        // Create main product
-        $product = Product::create([
-            'name' => $validated['name'],
-            'product_id' => $validated['product_id'],
-            'price' => $validated['price'],
-            'description' => $validated['description'] ?? null,
-            'brand' => $validated['brand'] ?? null,
-            'image' => $validated['image'] ?? null,
-            'color' => $validated['color'] ?? null,
-            'size' => $validated['size'] ?? null,
-            'status' => $validated['status'] ?? 'active',
-            'design' => $validated['design'] ?? null,
-        ]);
-
-        // Create variants if provided
-        if ($request->has('variants') && is_array($request->variants)) {
-            foreach ($request->variants as $index => $variant) {
-                if (!empty($variant['color']) || !empty($variant['size'])) {
-                    $variantData = [
-                        'name' => $validated['name'],
-                        'product_id' => $validated['product_id'],
-                        'price' => $variant['price'] ?? $validated['price'],
-                        'description' => $validated['description'] ?? null,
-                        'brand' => $validated['brand'] ?? null,
-                        'color' => $variant['color'] ?? null,
-                        'size' => $variant['size'] ?? null,
-                        'status' => $variant['status'] ?? 'active',
-                        'design' => $variant['design'] ?? null,
-                    ];
-
-                    // Handle variant image upload
-                    if ($request->hasFile("variants.{$index}.image")) {
-                        $variantImagePath = $request->file("variants.{$index}.image")->store('products', 'public');
-                        $variantData['image'] = $variantImagePath;
-                    } else {
-                        $variantData['image'] = $validated['image'] ?? null;
+            // Kiểm tra biến thể
+            $hasValidVariant = false;
+            if ($request->has('variants')) {
+                foreach ($request->variants as $variant) {
+                    if (!empty($variant['size_id']) && !empty($variant['color_id'])) {
+                        $hasValidVariant = true;
+                        break;
                     }
-
-                    Product::create($variantData);
                 }
             }
-        }
+            if (!$hasValidVariant) {
+                return redirect()->back()
+                    ->withInput()
+                    ->with('error', 'Bạn phải thêm ít nhất một biến thể sản phẩm!');
+            }
 
-        return redirect()->route('admin.product')->with('success', 'Sản phẩm đã được tạo thành công!');
+            // Thêm mới sản phẩm
+            $slug = Str::slug($request->name);
+            $originalSlug = $slug;
+            $counter = 1;
+
+            while (Product::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $counter++;
+            }
+            $product = Product::create([
+                'name'        => $request->name,
+                'category_id' => $request->category_id,
+                'brand_id'    => $request->brand_id,
+                'slug'        => $slug,
+                'price'       => $request->price,
+                'description' => $request->description,
+                'status'      => $request->status,
+                'thumbnail'   => $imagePath,
+            ]);
+
+            // Thêm vào bảng product_images
+            if ($imagePath) {
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'url' => $imagePath,
+                ]);
+            }
+            // Thêm biến thể sản phẩm
+            foreach ($request->variants as $variant) {
+                if (empty($variant['size_id']) || empty($variant['color_id']))
+                    continue;
+                ProductVariant::create([
+                    'product_id' => $product->id,
+                    'size_id' => $variant['size_id'],
+                    'color_id' => $variant['color_id'],
+                    'price' => $variant['price'],
+                    'stock' => $variant['stock'],
+                    'sku' => 'SP' . $product->id . $variant['size_id'] . $variant['color_id'],
+                ]);
+            }
+            DB::commit();
+            return redirect()->route('product.index')->with('success', 'Thêm sản phẩm thành công');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Đã xảy ra lỗi!');
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        $product = Product::with('category')->findOrFail($id);
-        // Get all variants (products with same name and category)
-        $variants = Product::where('name', $product->name)
-            ->where('product_id', $product->product_id)
-            ->where('id', '!=', $id)
-            ->get();
-        
-        return view('admin.products.show', compact('product', 'variants'));
+        $product = Product::findOrFail($id);
+        $variant = ProductVariant::where('product_id', $id)->first();
+        return view('admin.product.detail', compact('product', 'variant'));
     }
 
     /**
@@ -142,15 +141,12 @@ class ProductController extends Controller
      */
     public function edit(string $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::find($id);
         $categories = Category::all();
-        // Get all variants
-        $variants = Product::where('name', $product->name)
-            ->where('product_id', $product->product_id)
-            ->where('id', '!=', $id)
-            ->get();
-        
-        return view('admin.products.edit', compact('product', 'categories', 'variants'));
+        $brands = Brand::all();
+        $sizes = Size::all();
+        $colors = Color::all();
+        return view('admin.product.update', compact('product', 'categories', 'brands', 'sizes', 'colors'));
     }
 
     /**
@@ -158,152 +154,127 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $product = Product::findOrFail($id);
-        
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'product_id' => 'required|exists:categories,id',
-            'price' => 'required|numeric|min:0',
-            'description' => 'nullable|string',
-            'brand' => 'nullable|string|max:255',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'color' => 'nullable|string|max:255',
-            'size' => 'nullable|string|max:255',
-            'status' => 'nullable|string|max:255',
-            'design' => 'nullable|string|max:255',
-            // Variants
-            'variants' => 'nullable|array',
-            'variants.*.id' => 'nullable|exists:products,id',
-            'variants.*.color' => 'nullable|string|max:255',
-            'variants.*.size' => 'nullable|string|max:255',
-            'variants.*.price' => 'nullable|numeric|min:0',
-            'variants.*.image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'variants.*.status' => 'nullable|string|max:255',
-            'variants.*.design' => 'nullable|string|max:255',
-            'variants_to_delete' => 'nullable|array',
-        ]);
+        DB::beginTransaction();
+        try {
+            $product = Product::findOrFail($id);
+            $imagePath = $product->thumbnail;
 
-        // Handle image upload
-        if ($request->hasFile('image')) {
-            // Delete old image
-            if ($product->image && Storage::disk('public')->exists($product->image)) {
-                Storage::disk('public')->delete($product->image);
-            }
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
-        } else {
-            $validated['image'] = $product->image;
-        }
-
-        // Update main product
-        $product->update([
-            'name' => $validated['name'],
-            'product_id' => $validated['product_id'],
-            'price' => $validated['price'],
-            'description' => $validated['description'] ?? null,
-            'brand' => $validated['brand'] ?? null,
-            'image' => $validated['image'],
-            'color' => $validated['color'] ?? null,
-            'size' => $validated['size'] ?? null,
-            'status' => $validated['status'] ?? 'active',
-            'design' => $validated['design'] ?? null,
-        ]);
-
-        // Delete variants if requested
-        if ($request->has('variants_to_delete') && is_array($request->variants_to_delete)) {
-            foreach ($request->variants_to_delete as $variantId) {
-                $variant = Product::find($variantId);
-                if ($variant && $variant->image && Storage::disk('public')->exists($variant->image)) {
-                    Storage::disk('public')->delete($variant->image);
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageName = $image->getClientOriginalName();
+                $image->move(public_path('uploads/products/'), $imageName);
+                $imagePath = 'uploads/products/' . $imageName;
+                // Xóa ảnh cũ nếu có
+                if ($product->thumbnail && file_exists(public_path($product->thumbnail))) {
+                    unlink(public_path($product->thumbnail));
                 }
-                $variant->delete();
+                ProductImage::create([
+                    'product_id' => $product->id,
+                    'url' => $imagePath,
+                ]);
             }
-        }
+            // Thêm sản phẩm
+            $slug = Str::slug($request->name);
+            $originalSlug = $slug;
+            $counter = 1;
 
-        // Update existing variants or create new ones
-        if ($request->has('variants') && is_array($request->variants)) {
-            foreach ($request->variants as $index => $variantData) {
-                if (isset($variantData['id']) && $variantData['id']) {
-                    // Update existing variant
-                    $variant = Product::find($variantData['id']);
-                    if ($variant) {
-                        $updateData = [
-                            'name' => $validated['name'],
-                            'product_id' => $validated['product_id'],
-                            'price' => $variantData['price'] ?? $validated['price'],
-                            'description' => $validated['description'] ?? null,
-                            'brand' => $validated['brand'] ?? null,
-                            'color' => $variantData['color'] ?? null,
-                            'size' => $variantData['size'] ?? null,
-                            'status' => $variantData['status'] ?? 'active',
-                            'design' => $variantData['design'] ?? null,
-                        ];
+            while (Product::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $counter++;
+            }
+            // Cập nhật thông tin sản phẩm
+            $product->update([
+                'name' => $request->name,
+                'category_id' => $request->category_id,
+                'brand_id' => $request->brand_id,
+                'slug' => $slug,
+                'price' => $request->price,
+                'description' => $request->description,
+                'status' => $request->status,
+                'thumbnail' => $imagePath,
+            ]);
+            // Cập nhật biến thể sản phẩm
+            if ($request->has('variants')) {
+                $inputVariants = collect($request->variants)->unique(function ($item) {
+                    return $item['size_id'] . '-' . $item['color_id'];
+                });
+                $oldVariants = ProductVariant::where('product_id', $product->id)->get();
 
-                        // Handle variant image upload
-                        if ($request->hasFile("variants.{$index}.image")) {
-                            if ($variant->image && Storage::disk('public')->exists($variant->image)) {
-                                Storage::disk('public')->delete($variant->image);
-                            }
-                            $variantImagePath = $request->file("variants.{$index}.image")->store('products', 'public');
-                            $updateData['image'] = $variantImagePath;
-                        }
+                // Lưu lại các id biến thể đã xử lý
+                $variantIds = [];
 
-                        $variant->update($updateData);
+                foreach ($inputVariants as $variant) {
+                    if (empty($variant['size_id']) || empty($variant['color_id']))
+                        continue;
+
+                    // Tìm biến thể cũ theo size_id và color_id
+                    $old = $oldVariants->first(function ($item) use ($variant) {
+                        return $item->size_id == $variant['size_id'] && $item->color_id == $variant['color_id'];
+                    });
+
+                    if ($old) {
+                        // Cập nhật nếu đã có
+                        $old->update([
+                            'price' => $variant['price'],
+                            'stock' => $variant['stock'],
+                        ]);
+                        $variantIds[] = $old->id;
+                    } else {
+                        // Thêm mới nếu chưa có
+                        $new = ProductVariant::create([
+                            'product_id' => $product->id,
+                            'size_id' => $variant['size_id'],
+                            'color_id' => $variant['color_id'],
+                            'price' => $variant['price'],
+                            'stock' => $variant['stock'],
+                            'sku' => 'SP' . $product->id . $variant['size_id'] . $variant['color_id'],
+                        ]);
+                        $variantIds[] = $new->id;
                     }
+                }
+
+                // Xóa các biến thể không còn trong request
+                if (!empty($variantIds)) {
+                    ProductVariant::where('product_id', $product->id)
+                        ->whereNotIn('id', $variantIds)
+                        ->delete();
                 } else {
-                    // Create new variant
-                    if (!empty($variantData['color']) || !empty($variantData['size'])) {
-                        $newVariantData = [
-                            'name' => $validated['name'],
-                            'product_id' => $validated['product_id'],
-                            'price' => $variantData['price'] ?? $validated['price'],
-                            'description' => $validated['description'] ?? null,
-                            'brand' => $validated['brand'] ?? null,
-                            'color' => $variantData['color'] ?? null,
-                            'size' => $variantData['size'] ?? null,
-                            'status' => $variantData['status'] ?? 'active',
-                            'design' => $variantData['design'] ?? null,
-                        ];
-
-                        // Handle variant image upload
-                        if ($request->hasFile("variants.{$index}.image")) {
-                            $variantImagePath = $request->file("variants.{$index}.image")->store('products', 'public');
-                            $newVariantData['image'] = $variantImagePath;
-                        } else {
-                            $newVariantData['image'] = $validated['image'] ?? null;
-                        }
-
-                        Product::create($newVariantData);
-                    }
+                    // Nếu không có biến thể nào gửi lên, xóa hết biến thể cũ
+                    ProductVariant::where('product_id', $product->id)->delete();
                 }
             }
+
+            DB::commit();
+            return redirect()->route('product.index')->with('success', 'Cập nhật sản phẩm thành công');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            dd($e->getMessage());
         }
-
-        return redirect()->route('admin.product')->with('success', 'Sản phẩm đã được cập nhật thành công!');
-    }
-
-    /**
-     * Show delete confirmation page.
-     */
-    public function destroy(string $id)
-    {
-        return view('admin.products.delete', compact('id'));
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function delete(Request $request, string $id)
+    public function destroy(string $id)
     {
-        $product = Product::findOrFail($id);
-        
-        // Delete image if exists
-        if ($product->image && Storage::disk('public')->exists($product->image)) {
-            Storage::disk('public')->delete($product->image);
+        $product = Product::find($id);
+        if ($product) {
+            // Xóa ảnh đại diện
+            if ($product->thumbnail && file_exists(public_path($product->thumbnail))) {
+                unlink(public_path($product->thumbnail));
+            }
+            // Xóa ảnh phụ
+            foreach ($product->images as $img) {
+                if ($img->image && file_exists(public_path($img->image))) {
+                    unlink(public_path($img->image));
+                }
+                $img->delete();
+            }
+            // Xóa biến thể
+            ProductVariant::where('product_id', $product->id)->delete();
+            // Xóa sản phẩm
+            $product->delete();
+            return redirect()->route('product.index')->with('success', 'Xóa sản phẩm thành công');
         }
-        
-        $product->delete();
-        
-        return redirect()->route('admin.product')->with('success', 'Sản phẩm đã được xóa thành công!');
+        return redirect()->route('product.index')->with('error', 'Sản phẩm không tồn tại');
     }
 }
