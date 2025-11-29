@@ -1,0 +1,1346 @@
+{
+    "roles": [
+        {
+            "id": 1,
+            "name": "Admin"
+        },
+        {
+            "id": 2,
+            "name": "Customer"
+        },
+        {
+            "id": 3,
+            "name": "Staff"
+        },
+        {
+            "id": 4,
+            "name": "Shipper"
+        }
+    ],
+    "users": [
+        {
+            "id": 1,
+            "name": "Admin User",
+            "email": "admin",
+            "password": "1234",
+            "phone": null,
+            "gender": null,
+            "birth_date": null,
+            "address": null,
+            "points": 0,
+            "tier": null,
+            "role_id": 1,
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47",
+            "reset_otp": null,
+            "otp_expires_at": null
+        }
+    ],
+    "categories": [
+        {
+            "id": 1,
+            "name": "Giày Nam",
+            "slug": "giay-nam",
+            "status": 1,
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 2,
+            "name": "Giày Nữ",
+            "slug": "giay-nu",
+            "status": 1,
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        }
+    ],
+    "brands": [
+        {
+            "id": 1,
+            "name": "Nike",
+            "slug": "nike",
+            "logo": "uploads\/brands\/nike.png",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 2,
+            "name": "Adidas",
+            "slug": "adidas",
+            "logo": "uploads\/brands\/adidas.jpg",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 3,
+            "name": "Puma",
+            "slug": "puma",
+            "logo": "uploads\/brands\/puma.jpg",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 4,
+            "name": "Jordan",
+            "slug": "jordan",
+            "logo": "uploads\/brands\/logo1.jpg",
+            "created_at": "2025-07-03 10:10:11",
+            "updated_at": "2025-07-03 10:10:11"
+        },
+        {
+            "id": 5,
+            "name": "Lacoste",
+            "slug": "lacoste",
+            "logo": "uploads\/brands\/lacoste.jpg",
+            "created_at": "2025-07-04 05:33:48",
+            "updated_at": "2025-07-04 05:33:48"
+        },
+        {
+            "id": 7,
+            "name": "New Balance",
+            "slug": "new-balance",
+            "logo": "uploads\/brands\/balance.jpg",
+            "created_at": "2025-07-04 05:35:14",
+            "updated_at": "2025-07-04 05:35:14"
+        },
+        {
+            "id": 8,
+            "name": "Vans",
+            "slug": "vans",
+            "logo": "uploads\/brands\/vans.jpg",
+            "created_at": "2025-07-04 05:35:56",
+            "updated_at": "2025-07-04 05:35:56"
+        }
+    ],
+    "products": [
+        {
+            "id": 1,
+            "name": "Giày Nike DownShifter 13 Nam - Đen Trắng",
+            "slug": "giay-sneaker-trang",
+            "description": "Mẫu giày sneaker trắng thời trang và dễ phối đồ.",
+            "category_id": 1,
+            "brand_id": 1,
+            "price": "1200000.00",
+            "thumbnail": "uploads\/products\/1751379356_sp1.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:15:56",
+            "deleted_at": null
+        },
+        {
+            "id": 2,
+            "name": "Giày Nike Court Vision Low Nam - Đen Trắng",
+            "slug": "giay-nike",
+            "description": "Mẫu giày năng động vào thời trang.",
+            "category_id": 1,
+            "brand_id": 1,
+            "price": "2000000.00",
+            "thumbnail": "uploads\/products\/1751379425_sp2.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 14:17:05",
+            "updated_at": "2025-07-01 14:55:11",
+            "deleted_at": null
+        },
+        {
+            "id": 3,
+            "name": "Giày Nike Vomero 18 Nam - Trắng Xám",
+            "slug": "giay-nike",
+            "description": "Mẫu giày năng động và thời trang",
+            "category_id": 1,
+            "brand_id": 1,
+            "price": "2000000.00",
+            "thumbnail": "uploads\/products\/1751381816_sp11.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 14:56:56",
+            "updated_at": "2025-07-01 14:56:56",
+            "deleted_at": null
+        },
+        {
+            "id": 4,
+            "name": "Giày Nike Court Vision Low Nam - Be Trắng",
+            "slug": "giay-nike",
+            "description": "Mẫu giày năng động",
+            "category_id": 1,
+            "brand_id": 1,
+            "price": "2500000.00",
+            "thumbnail": "uploads\/products\/1751381912_sp4.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 14:58:32",
+            "updated_at": "2025-07-01 14:58:32",
+            "deleted_at": null
+        },
+        {
+            "id": 5,
+            "name": "Giày Nike Dunk Low Retro Nam - Trắng Đỏ",
+            "slug": "giay-nike",
+            "description": "Mẫu giày năng động và thể thao",
+            "category_id": 1,
+            "brand_id": 1,
+            "price": "2599999.00",
+            "thumbnail": "uploads\/products\/1751382010_sp5.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 15:00:10",
+            "updated_at": "2025-07-01 15:00:10",
+            "deleted_at": null
+        },
+        {
+            "id": 6,
+            "name": "Giày adidas Campus 2 Nam - Đỏ",
+            "slug": "giay-nike",
+            "description": "Mẫu giày năng động và cá tính",
+            "category_id": 1,
+            "brand_id": 2,
+            "price": "2599999.00",
+            "thumbnail": "uploads\/products\/1751382106_sp6.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 15:01:46",
+            "updated_at": "2025-07-01 15:01:46",
+            "deleted_at": null
+        },
+        {
+            "id": 7,
+            "name": "Giày Adidas Pureboost 5 Nam - Đen Trắng",
+            "slug": "giay-adidas",
+            "description": "Mẫu giày thể thao",
+            "category_id": 1,
+            "brand_id": 2,
+            "price": "2599999.00",
+            "thumbnail": "uploads\/products\/1751382190_sp7.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 15:03:10",
+            "updated_at": "2025-07-01 15:03:10",
+            "deleted_at": null
+        },
+        {
+            "id": 8,
+            "name": "Giày Puma Shuffle Trainers Nam - Trắng Xanh Lá",
+            "slug": "giay-puma",
+            "description": "Mẫu giày thể thao",
+            "category_id": 1,
+            "brand_id": 3,
+            "price": "4499999.00",
+            "thumbnail": "uploads\/products\/1751382337_sp8.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 15:05:37",
+            "updated_at": "2025-07-01 15:05:37",
+            "deleted_at": null
+        },
+        {
+            "id": 9,
+            "name": "Giày Nike Air Force 1 '07 Nữ - Trắng",
+            "slug": "giay-nike",
+            "description": "Mẫu giày năng động",
+            "category_id": 2,
+            "brand_id": 1,
+            "price": "2500000.00",
+            "thumbnail": "uploads\/products\/1751382405_sp9.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 15:06:45",
+            "updated_at": "2025-07-01 15:06:45",
+            "deleted_at": null
+        },
+        {
+            "id": 10,
+            "name": "Giày Nike Dunk Low Retro Nam - Trắng Navy",
+            "slug": "giay-nike",
+            "description": "Mẫu giày thể thao",
+            "category_id": 1,
+            "brand_id": 1,
+            "price": "2500000.00",
+            "thumbnail": "uploads\/products\/1751382513_sp10.jpg",
+            "status": 1,
+            "created_at": "2025-07-01 15:08:33",
+            "updated_at": "2025-07-01 15:08:33",
+            "deleted_at": null
+        },
+        {
+            "id": 11,
+            "name": "Giày Adidas Supernova Rise 2 Nam - Đen Xanh",
+            "slug": "giay-adidas",
+            "description": "Mẫu giày đẹp",
+            "category_id": 1,
+            "brand_id": 2,
+            "price": "4000000.00",
+            "thumbnail": "uploads\/products\/1751640878_sp12.jpg",
+            "status": 1,
+            "created_at": "2025-07-04 14:54:38",
+            "updated_at": "2025-07-04 14:54:38",
+            "deleted_at": null
+        },
+        {
+            "id": 12,
+            "name": "Giày Adidas Terrex AX3 Nam - Xám",
+            "slug": "giay-adidas",
+            "description": "Mẫu giày đẹp",
+            "category_id": 1,
+            "brand_id": 2,
+            "price": "3000000.00",
+            "thumbnail": "uploads\/products\/1751641032_sp13.jpg",
+            "status": 1,
+            "created_at": "2025-07-04 14:57:12",
+            "updated_at": "2025-07-04 14:57:12",
+            "deleted_at": null
+        },
+        {
+            "id": 13,
+            "name": "Giày Lacoste Court Cage 224 Nam - Trắng",
+            "slug": "giay-lacoste",
+            "description": "Mẫu giày đẹp",
+            "category_id": 1,
+            "brand_id": 5,
+            "price": "2790000.00",
+            "thumbnail": "uploads\/products\/1751641136_sp14.jpg",
+            "status": 1,
+            "created_at": "2025-07-04 14:58:56",
+            "updated_at": "2025-07-04 14:58:56",
+            "deleted_at": null
+        },
+        {
+            "id": 14,
+            "name": "Giày Lacoste Carnaby Pro CGR Nam - Trắng Navy",
+            "slug": "giay-lacoste",
+            "description": "Mẫu giày đẹp",
+            "category_id": 1,
+            "brand_id": 5,
+            "price": "2990000.00",
+            "thumbnail": "uploads\/products\/1751641229_sp15.jpg",
+            "status": 1,
+            "created_at": "2025-07-04 15:00:29",
+            "updated_at": "2025-07-04 15:00:29",
+            "deleted_at": null
+        },
+        {
+            "id": 15,
+            "name": "Giày New Balance 530 ‘White Pink’ Men Unisex Casual Lifestyle Shoes",
+            "slug": "giay-new-balance",
+            "description": "Mẫu giày đẹp",
+            "category_id": 1,
+            "brand_id": 7,
+            "price": "2990000.00",
+            "thumbnail": "uploads\/products\/1751641481_sp16.jpg",
+            "status": 1,
+            "created_at": "2025-07-04 15:04:41",
+            "updated_at": "2025-07-04 15:04:41",
+            "deleted_at": null
+        },
+        {
+            "id": 16,
+            "name": "Giày Vans Old Skool Cordura Dress Blues",
+            "slug": "giay-vans",
+            "description": "Mẫu giày đẹp",
+            "category_id": 1,
+            "brand_id": 8,
+            "price": "1490000.00",
+            "thumbnail": "uploads\/products\/s1.webp",
+            "status": 1,
+            "created_at": "2025-07-04 15:09:48",
+            "updated_at": "2025-07-26 09:03:22",
+            "deleted_at": null
+        }
+    ],
+    "sizes": [
+        {
+            "id": 1,
+            "value": "38",
+            "created_at": null,
+            "updated_at": null,
+            "deleted_at": null
+        },
+        {
+            "id": 2,
+            "value": "39",
+            "created_at": null,
+            "updated_at": null,
+            "deleted_at": null
+        },
+        {
+            "id": 3,
+            "value": "40",
+            "created_at": null,
+            "updated_at": null,
+            "deleted_at": null
+        },
+        {
+            "id": 4,
+            "value": "41",
+            "created_at": null,
+            "updated_at": null,
+            "deleted_at": null
+        },
+        {
+            "id": 5,
+            "value": "42",
+            "created_at": null,
+            "updated_at": null,
+            "deleted_at": null
+        }
+    ],
+    "colors": [
+        {
+            "id": 1,
+            "name": "Trắng",
+            "hex_code": "#FFFFFF"
+        },
+        {
+            "id": 2,
+            "name": "Đen",
+            "hex_code": "#000000"
+        },
+        {
+            "id": 4,
+            "name": "Be",
+            "hex_code": "#f5e0e0"
+        },
+        {
+            "id": 5,
+            "name": "Xanh dương",
+            "hex_code": "#47a6ff"
+        },
+        {
+            "id": 6,
+            "name": "Đỏ",
+            "hex_code": "#ff0000"
+        },
+        {
+            "id": 7,
+            "name": "Vàng",
+            "hex_code": "#fbff00"
+        },
+        {
+            "id": 8,
+            "name": "Cam",
+            "hex_code": "#ffda24"
+        },
+        {
+            "id": 9,
+            "name": "Xanh lá",
+            "hex_code": "#05ff22"
+        },
+        {
+            "id": 10,
+            "name": "Trắng xám",
+            "hex_code": "#e3d9d9"
+        },
+        {
+            "id": 11,
+            "name": "Đen xanh",
+            "hex_code": "#5679e1"
+        },
+        {
+            "id": 12,
+            "name": "Xám",
+            "hex_code": "#928b8b"
+        }
+    ],
+    "product_variants": [
+        {
+            "id": 1,
+            "product_id": 1,
+            "size_id": 1,
+            "color_id": 1,
+            "stock": 10,
+            "price": "1200000.00",
+            "sku": "SP1",
+            "image": null,
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 2,
+            "product_id": 1,
+            "size_id": 2,
+            "color_id": 2,
+            "stock": 11,
+            "price": "1200000.00",
+            "sku": "SP122",
+            "image": null,
+            "created_at": "2025-07-01 14:15:56",
+            "updated_at": "2025-07-01 14:15:56"
+        },
+        {
+            "id": 3,
+            "product_id": 2,
+            "size_id": 1,
+            "color_id": 2,
+            "stock": 12,
+            "price": "2000000.00",
+            "sku": "SP212",
+            "image": null,
+            "created_at": "2025-07-01 14:17:05",
+            "updated_at": "2025-07-01 14:17:05"
+        },
+        {
+            "id": 4,
+            "product_id": 2,
+            "size_id": 2,
+            "color_id": 2,
+            "stock": 12,
+            "price": "2000000.00",
+            "sku": "SP222",
+            "image": null,
+            "created_at": "2025-07-01 14:17:05",
+            "updated_at": "2025-07-01 14:17:05"
+        },
+        {
+            "id": 5,
+            "product_id": 3,
+            "size_id": 2,
+            "color_id": 10,
+            "stock": 12,
+            "price": "2000000.00",
+            "sku": "SP3210",
+            "image": null,
+            "created_at": "2025-07-01 14:56:56",
+            "updated_at": "2025-07-01 14:56:56"
+        },
+        {
+            "id": 6,
+            "product_id": 3,
+            "size_id": 3,
+            "color_id": 10,
+            "stock": 12,
+            "price": "2300000.00",
+            "sku": "SP3310",
+            "image": null,
+            "created_at": "2025-07-01 14:56:56",
+            "updated_at": "2025-07-01 14:56:56"
+        },
+        {
+            "id": 7,
+            "product_id": 4,
+            "size_id": 3,
+            "color_id": 4,
+            "stock": 45,
+            "price": "2000000.00",
+            "sku": "SP434",
+            "image": null,
+            "created_at": "2025-07-01 14:58:32",
+            "updated_at": "2025-07-01 14:58:32"
+        },
+        {
+            "id": 8,
+            "product_id": 4,
+            "size_id": 5,
+            "color_id": 4,
+            "stock": 23,
+            "price": "2000000.00",
+            "sku": "SP454",
+            "image": null,
+            "created_at": "2025-07-01 14:58:32",
+            "updated_at": "2025-07-01 14:58:32"
+        },
+        {
+            "id": 9,
+            "product_id": 5,
+            "size_id": 4,
+            "color_id": 6,
+            "stock": 23,
+            "price": "1200000.00",
+            "sku": "SP546",
+            "image": null,
+            "created_at": "2025-07-01 15:00:10",
+            "updated_at": "2025-07-01 15:00:10"
+        },
+        {
+            "id": 10,
+            "product_id": 5,
+            "size_id": 5,
+            "color_id": 6,
+            "stock": 24,
+            "price": "1200000.00",
+            "sku": "SP556",
+            "image": null,
+            "created_at": "2025-07-01 15:00:10",
+            "updated_at": "2025-07-01 15:00:10"
+        },
+        {
+            "id": 11,
+            "product_id": 5,
+            "size_id": 3,
+            "color_id": 6,
+            "stock": 12,
+            "price": "1200000.00",
+            "sku": "SP536",
+            "image": null,
+            "created_at": "2025-07-01 15:00:10",
+            "updated_at": "2025-07-01 15:00:10"
+        },
+        {
+            "id": 12,
+            "product_id": 6,
+            "size_id": 1,
+            "color_id": 6,
+            "stock": 23,
+            "price": "1200000.00",
+            "sku": "SP616",
+            "image": null,
+            "created_at": "2025-07-01 15:01:46",
+            "updated_at": "2025-07-01 15:01:46"
+        },
+        {
+            "id": 13,
+            "product_id": 6,
+            "size_id": 5,
+            "color_id": 6,
+            "stock": 14,
+            "price": "2300000.00",
+            "sku": "SP656",
+            "image": null,
+            "created_at": "2025-07-01 15:01:46",
+            "updated_at": "2025-07-01 15:01:46"
+        },
+        {
+            "id": 14,
+            "product_id": 7,
+            "size_id": 2,
+            "color_id": 2,
+            "stock": 23,
+            "price": "2400000.00",
+            "sku": "SP722",
+            "image": null,
+            "created_at": "2025-07-01 15:03:10",
+            "updated_at": "2025-07-01 15:03:10"
+        },
+        {
+            "id": 15,
+            "product_id": 7,
+            "size_id": 3,
+            "color_id": 2,
+            "stock": 23,
+            "price": "2300000.00",
+            "sku": "SP732",
+            "image": null,
+            "created_at": "2025-07-01 15:03:10",
+            "updated_at": "2025-07-01 15:03:10"
+        },
+        {
+            "id": 16,
+            "product_id": 8,
+            "size_id": 2,
+            "color_id": 1,
+            "stock": 12,
+            "price": "4900000.00",
+            "sku": "SP821",
+            "image": null,
+            "created_at": "2025-07-01 15:05:37",
+            "updated_at": "2025-07-01 15:05:37"
+        },
+        {
+            "id": 17,
+            "product_id": 8,
+            "size_id": 5,
+            "color_id": 1,
+            "stock": 10,
+            "price": "4800000.00",
+            "sku": "SP851",
+            "image": null,
+            "created_at": "2025-07-01 15:05:37",
+            "updated_at": "2025-07-01 15:05:37"
+        },
+        {
+            "id": 18,
+            "product_id": 9,
+            "size_id": 2,
+            "color_id": 1,
+            "stock": 12,
+            "price": "2500000.00",
+            "sku": "SP921",
+            "image": null,
+            "created_at": "2025-07-01 15:06:45",
+            "updated_at": "2025-07-01 15:06:45"
+        },
+        {
+            "id": 19,
+            "product_id": 9,
+            "size_id": 5,
+            "color_id": 8,
+            "stock": 14,
+            "price": "2500000.00",
+            "sku": "SP958",
+            "image": null,
+            "created_at": "2025-07-01 15:06:45",
+            "updated_at": "2025-07-01 15:06:45"
+        },
+        {
+            "id": 20,
+            "product_id": 10,
+            "size_id": 3,
+            "color_id": 5,
+            "stock": 12,
+            "price": "2500000.00",
+            "sku": "SP1035",
+            "image": null,
+            "created_at": "2025-07-01 15:08:33",
+            "updated_at": "2025-07-01 15:08:33"
+        },
+        {
+            "id": 21,
+            "product_id": 10,
+            "size_id": 4,
+            "color_id": 5,
+            "stock": 14,
+            "price": "2500000.00",
+            "sku": "SP1045",
+            "image": null,
+            "created_at": "2025-07-01 15:08:33",
+            "updated_at": "2025-07-01 15:08:33"
+        },
+        {
+            "id": 22,
+            "product_id": 11,
+            "size_id": 4,
+            "color_id": 11,
+            "stock": 20,
+            "price": "4000000.00",
+            "sku": "SP11411",
+            "image": null,
+            "created_at": "2025-07-04 14:54:38",
+            "updated_at": "2025-07-04 14:54:38"
+        },
+        {
+            "id": 23,
+            "product_id": 11,
+            "size_id": 5,
+            "color_id": 11,
+            "stock": 10,
+            "price": "4100000.00",
+            "sku": "SP11511",
+            "image": null,
+            "created_at": "2025-07-04 14:54:38",
+            "updated_at": "2025-07-04 14:54:38"
+        },
+        {
+            "id": 24,
+            "product_id": 12,
+            "size_id": 2,
+            "color_id": 12,
+            "stock": 20,
+            "price": "3000000.00",
+            "sku": "SP12212",
+            "image": null,
+            "created_at": "2025-07-04 14:57:12",
+            "updated_at": "2025-07-04 14:57:12"
+        },
+        {
+            "id": 25,
+            "product_id": 12,
+            "size_id": 3,
+            "color_id": 12,
+            "stock": 10,
+            "price": "3000000.00",
+            "sku": "SP12312",
+            "image": null,
+            "created_at": "2025-07-04 14:57:12",
+            "updated_at": "2025-07-04 14:57:12"
+        },
+        {
+            "id": 26,
+            "product_id": 12,
+            "size_id": 4,
+            "color_id": 12,
+            "stock": 20,
+            "price": "3000000.00",
+            "sku": "SP12412",
+            "image": null,
+            "created_at": "2025-07-04 14:57:12",
+            "updated_at": "2025-07-04 14:57:12"
+        },
+        {
+            "id": 27,
+            "product_id": 12,
+            "size_id": 5,
+            "color_id": 12,
+            "stock": 15,
+            "price": "3200000.00",
+            "sku": "SP12512",
+            "image": null,
+            "created_at": "2025-07-04 14:57:12",
+            "updated_at": "2025-07-04 14:57:12"
+        },
+        {
+            "id": 28,
+            "product_id": 13,
+            "size_id": 1,
+            "color_id": 1,
+            "stock": 10,
+            "price": "2790000.00",
+            "sku": "SP1311",
+            "image": null,
+            "created_at": "2025-07-04 14:58:56",
+            "updated_at": "2025-07-04 14:58:56"
+        },
+        {
+            "id": 29,
+            "product_id": 13,
+            "size_id": 2,
+            "color_id": 1,
+            "stock": 30,
+            "price": "2890000.00",
+            "sku": "SP1321",
+            "image": null,
+            "created_at": "2025-07-04 14:58:56",
+            "updated_at": "2025-07-04 14:58:56"
+        },
+        {
+            "id": 30,
+            "product_id": 13,
+            "size_id": 3,
+            "color_id": 1,
+            "stock": 16,
+            "price": "2890000.00",
+            "sku": "SP1331",
+            "image": null,
+            "created_at": "2025-07-04 14:58:56",
+            "updated_at": "2025-07-04 14:58:56"
+        },
+        {
+            "id": 31,
+            "product_id": 14,
+            "size_id": 1,
+            "color_id": 1,
+            "stock": 10,
+            "price": "2790000.00",
+            "sku": "SP1411",
+            "image": null,
+            "created_at": "2025-07-04 15:00:29",
+            "updated_at": "2025-07-04 15:00:29"
+        },
+        {
+            "id": 32,
+            "product_id": 14,
+            "size_id": 2,
+            "color_id": 1,
+            "stock": 36,
+            "price": "2890000.00",
+            "sku": "SP1421",
+            "image": null,
+            "created_at": "2025-07-04 15:00:29",
+            "updated_at": "2025-07-04 15:00:29"
+        },
+        {
+            "id": 33,
+            "product_id": 14,
+            "size_id": 3,
+            "color_id": 1,
+            "stock": 36,
+            "price": "2790000.00",
+            "sku": "SP1431",
+            "image": null,
+            "created_at": "2025-07-04 15:00:29",
+            "updated_at": "2025-07-04 15:00:29"
+        },
+        {
+            "id": 34,
+            "product_id": 15,
+            "size_id": 1,
+            "color_id": 1,
+            "stock": 0,
+            "price": "2790000.00",
+            "sku": "SP1511",
+            "image": null,
+            "created_at": "2025-07-04 15:04:41",
+            "updated_at": "2025-07-26 08:36:43"
+        },
+        {
+            "id": 35,
+            "product_id": 15,
+            "size_id": 2,
+            "color_id": 1,
+            "stock": 56,
+            "price": "2790000.00",
+            "sku": "SP1521",
+            "image": null,
+            "created_at": "2025-07-04 15:04:41",
+            "updated_at": "2025-07-04 15:04:41"
+        },
+        {
+            "id": 36,
+            "product_id": 15,
+            "size_id": 3,
+            "color_id": 1,
+            "stock": 36,
+            "price": "2790000.00",
+            "sku": "SP1531",
+            "image": null,
+            "created_at": "2025-07-04 15:04:41",
+            "updated_at": "2025-07-04 15:04:41"
+        },
+        {
+            "id": 37,
+            "product_id": 16,
+            "size_id": 3,
+            "color_id": 5,
+            "stock": 26,
+            "price": "1490000.00",
+            "sku": "SP1635",
+            "image": null,
+            "created_at": "2025-07-04 15:09:48",
+            "updated_at": "2025-07-04 15:09:48"
+        },
+        {
+            "id": 38,
+            "product_id": 16,
+            "size_id": 4,
+            "color_id": 5,
+            "stock": 36,
+            "price": "1490000.00",
+            "sku": "SP1645",
+            "image": null,
+            "created_at": "2025-07-04 15:09:48",
+            "updated_at": "2025-07-04 15:09:48"
+        },
+        {
+            "id": 39,
+            "product_id": 16,
+            "size_id": 5,
+            "color_id": 5,
+            "stock": 23,
+            "price": "1490000.00",
+            "sku": "SP1655",
+            "image": null,
+            "created_at": "2025-07-04 15:09:48",
+            "updated_at": "2025-07-04 15:09:48"
+        }
+    ],
+    "vouchers": [
+        {
+            "id": 1,
+            "code": "HP10",
+            "description": "Giảm 10% cho đơn hàng đầu tiên",
+            "discount_type": "percent",
+            "discount_value": "10.00",
+            "max_discount": "50000.00",
+            "min_order_value": "300000.00",
+            "usage_limit": 100,
+            "used_count": 0,
+            "valid_from": "2025-07-01 00:00:00",
+            "valid_to": "2025-12-31 23:59:59",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        }
+    ],
+    "blog_categories": [
+        {
+            "id": 1,
+            "name": "Tin tức",
+            "slug": "tin-tuc",
+            "status": 1,
+            "created_at": "2025-07-01 00:00:00",
+            "updated_at": "2025-07-01 00:00:00"
+        },
+        {
+            "id": 2,
+            "name": "Hướng dẫn phối đồ",
+            "slug": "huong-dan-phoi-do",
+            "status": 1,
+            "created_at": "2025-07-01 00:00:00",
+            "updated_at": "2025-07-01 00:00:00"
+        }
+    ],
+    "blog_tags": [
+        {
+            "id": 1,
+            "name": "Sneaker",
+            "slug": "sneaker",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 2,
+            "name": "Thời trang",
+            "slug": "thoi-trang",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        },
+        {
+            "id": 3,
+            "name": "Giày trắng",
+            "slug": "giay-trang",
+            "created_at": "2025-07-01 14:13:47",
+            "updated_at": "2025-07-01 14:13:47"
+        }
+    ],
+    "blog_posts": [
+        {
+            "id": 1,
+            "blog_category_id": 1,
+            "title": "Cách chọn giày sneaker phù hợp",
+            "slug": "cach-chon-giay-sneaker-phu-hop",
+            "thumbnail": "uploads\/blog\/sneaker1.jpg",
+            "content": "Nội dung bài viết về cách chọn giày sneaker phù hợp với phong cách của bạn...",
+            "status": 1,
+            "published_at": "2025-07-01 08:00:00",
+            "created_at": "2025-07-01 00:00:00",
+            "updated_at": "2025-07-01 00:00:00"
+        },
+        {
+            "id": 2,
+            "blog_category_id": 2,
+            "title": "5 cách phối đồ với giày trắng",
+            "slug": "5-cach-phoi-do-voi-giay-trang",
+            "thumbnail": "uploads\/blog\/phoi-do-giay-trang.jpg",
+            "content": "Giày trắng là item thời trang không thể thiếu. Dưới đây là 5 cách phối đồ cực chuẩn...",
+            "status": 1,
+            "published_at": "2025-07-01 10:00:00",
+            "created_at": "2025-07-01 00:00:00",
+            "updated_at": "2025-07-01 00:00:00"
+        }
+    ],
+    "blog_post_tags": [
+        {
+            "id": 1,
+            "blog_post_id": 1,
+            "blog_tag_id": 1,
+            "created_at": null,
+            "updated_at": null
+        },
+        {
+            "id": 2,
+            "blog_post_id": 1,
+            "blog_tag_id": 2,
+            "created_at": null,
+            "updated_at": null
+        }
+    ],
+    "pos_orders": [
+        {
+            "id": 1,
+            "staff_id": 3,
+            "customer_id": 1,
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "total_amount": "1200000.00",
+            "payment_method": "Tiền mặt",
+            "status": "Đã thanh toán",
+            "note": "Hoá đơn tạm",
+            "created_at": "2025-07-26 02:21:10",
+            "updated_at": "2025-07-26 02:21:18"
+        },
+        {
+            "id": 2,
+            "staff_id": 3,
+            "customer_id": 1,
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "total_amount": "0.00",
+            "payment_method": "Tiền mặt",
+            "status": "Đang chờ",
+            "note": "Hoá đơn tạm",
+            "created_at": "2025-07-26 02:21:11",
+            "updated_at": "2025-07-26 02:21:11"
+        },
+        {
+            "id": 3,
+            "staff_id": 3,
+            "customer_id": 1,
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "total_amount": "0.00",
+            "payment_method": "Tiền mặt",
+            "status": "Đang chờ",
+            "note": "Hoá đơn tạm",
+            "created_at": "2025-07-26 02:21:12",
+            "updated_at": "2025-07-26 02:21:12"
+        },
+        {
+            "id": 4,
+            "staff_id": 3,
+            "customer_id": 1,
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "total_amount": "4000000.00",
+            "payment_method": "Tiền mặt",
+            "status": "Đã thanh toán",
+            "note": "Hoá đơn tạm",
+            "created_at": "2025-07-26 02:21:21",
+            "updated_at": "2025-07-26 02:21:30"
+        },
+        {
+            "id": 5,
+            "staff_id": 3,
+            "customer_id": 1,
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "total_amount": "0.00",
+            "payment_method": "Tiền mặt",
+            "status": "Đang chờ",
+            "note": "Hoá đơn tạm",
+            "created_at": "2025-07-26 02:21:21",
+            "updated_at": "2025-07-26 02:21:21"
+        },
+        {
+            "id": 6,
+            "staff_id": 3,
+            "customer_id": 1,
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "total_amount": "0.00",
+            "payment_method": "Tiền mặt",
+            "status": "Đang chờ",
+            "note": "Hoá đơn tạm",
+            "created_at": "2025-07-26 08:31:57",
+            "updated_at": "2025-07-26 08:31:57"
+        }
+    ],
+    "pos_order_items": [
+        {
+            "id": 1,
+            "pos_order_id": 1,
+            "product_variant_id": 1,
+            "quantity": 1,
+            "price": "1200000.00",
+            "created_at": "2025-07-26 02:21:16",
+            "updated_at": "2025-07-26 02:21:16"
+        },
+        {
+            "id": 2,
+            "pos_order_id": 4,
+            "product_variant_id": 3,
+            "quantity": 1,
+            "price": "2000000.00",
+            "created_at": "2025-07-26 02:21:26",
+            "updated_at": "2025-07-26 02:21:26"
+        },
+        {
+            "id": 3,
+            "pos_order_id": 4,
+            "product_variant_id": 5,
+            "quantity": 1,
+            "price": "2000000.00",
+            "created_at": "2025-07-26 02:21:28",
+            "updated_at": "2025-07-26 02:21:28"
+        }
+    ],
+    "orders": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "name": "Hiếu Nguyễn",
+            "email": "123@gmail.com",
+            "phone": "0393306700",
+            "total_amount": "2400000.00",
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "status": "processing",
+            "payment_method": "COD",
+            "shipping_address": "Bến Bính - Thủy Nguyên",
+            "created_at": "2025-07-26 09:22:33",
+            "updated_at": "2025-07-26 09:22:33",
+            "cancel_reason": null
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "name": "Hiếu Nguyễn",
+            "email": "heudao20456@gmail.com",
+            "phone": "0393306700",
+            "total_amount": "15000000.00",
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "status": "processing",
+            "payment_method": "COD",
+            "shipping_address": "Bến Bính - Thủy Nguyên",
+            "created_at": "2025-07-26 09:28:50",
+            "updated_at": "2025-07-26 09:28:50",
+            "cancel_reason": null
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "name": "Hiếu Nguyễn",
+            "email": "heudao20456@gmail.com",
+            "phone": "0393306700",
+            "total_amount": "9600000.00",
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "status": "cancelled",
+            "payment_method": "COD",
+            "shipping_address": "Bến Bính - Thủy Nguyên",
+            "created_at": "2025-07-26 09:30:21",
+            "updated_at": "2025-07-26 08:37:01",
+            "cancel_reason": null
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "name": "Hiếu Nguyễn",
+            "email": "heudao20456@gmail.com",
+            "phone": "0393306700",
+            "total_amount": "7700000.00",
+            "voucher_id": null,
+            "discount_applied": "0.00",
+            "status": "completed",
+            "payment_method": "COD",
+            "shipping_address": "Bến Bính - Thủy Nguyên",
+            "created_at": "2025-07-26 09:31:28",
+            "updated_at": "2025-07-26 08:34:12",
+            "cancel_reason": null
+        }
+    ],
+    "order_items": [
+        {
+            "id": 1,
+            "order_id": 1,
+            "product_variant_id": 1,
+            "quantity": 2,
+            "price": "1200000.00",
+            "created_at": "2025-07-26 09:22:33",
+            "updated_at": "2025-07-26 09:22:33"
+        },
+        {
+            "id": 2,
+            "order_id": 2,
+            "product_variant_id": 1,
+            "quantity": 1,
+            "price": "1200000.00",
+            "created_at": "2025-07-26 09:28:50",
+            "updated_at": "2025-07-26 09:28:50"
+        },
+        {
+            "id": 3,
+            "order_id": 2,
+            "product_variant_id": 3,
+            "quantity": 2,
+            "price": "2000000.00",
+            "created_at": "2025-07-26 09:28:50",
+            "updated_at": "2025-07-26 09:28:50"
+        },
+        {
+            "id": 4,
+            "order_id": 2,
+            "product_variant_id": 17,
+            "quantity": 1,
+            "price": "4800000.00",
+            "created_at": "2025-07-26 09:28:50",
+            "updated_at": "2025-07-26 09:28:50"
+        },
+        {
+            "id": 5,
+            "order_id": 2,
+            "product_variant_id": 18,
+            "quantity": 1,
+            "price": "2500000.00",
+            "created_at": "2025-07-26 09:28:50",
+            "updated_at": "2025-07-26 09:28:50"
+        },
+        {
+            "id": 6,
+            "order_id": 2,
+            "product_variant_id": 19,
+            "quantity": 1,
+            "price": "2500000.00",
+            "created_at": "2025-07-26 09:28:50",
+            "updated_at": "2025-07-26 09:28:50"
+        },
+        {
+            "id": 7,
+            "order_id": 3,
+            "product_variant_id": 2,
+            "quantity": 1,
+            "price": "1200000.00",
+            "created_at": "2025-07-26 09:30:21",
+            "updated_at": "2025-07-26 09:30:21"
+        },
+        {
+            "id": 8,
+            "order_id": 3,
+            "product_variant_id": 12,
+            "quantity": 2,
+            "price": "1200000.00",
+            "created_at": "2025-07-26 09:30:21",
+            "updated_at": "2025-07-26 09:30:21"
+        },
+        {
+            "id": 9,
+            "order_id": 3,
+            "product_variant_id": 26,
+            "quantity": 1,
+            "price": "3000000.00",
+            "created_at": "2025-07-26 09:30:21",
+            "updated_at": "2025-07-26 09:30:21"
+        },
+        {
+            "id": 10,
+            "order_id": 3,
+            "product_variant_id": 24,
+            "quantity": 1,
+            "price": "3000000.00",
+            "created_at": "2025-07-26 09:30:21",
+            "updated_at": "2025-07-26 09:30:21"
+        },
+        {
+            "id": 11,
+            "order_id": 4,
+            "product_variant_id": 21,
+            "quantity": 1,
+            "price": "2500000.00",
+            "created_at": "2025-07-26 09:31:28",
+            "updated_at": "2025-07-26 09:31:28"
+        },
+        {
+            "id": 12,
+            "order_id": 4,
+            "product_variant_id": 11,
+            "quantity": 1,
+            "price": "1200000.00",
+            "created_at": "2025-07-26 09:31:28",
+            "updated_at": "2025-07-26 09:31:28"
+        },
+        {
+            "id": 13,
+            "order_id": 4,
+            "product_variant_id": 8,
+            "quantity": 1,
+            "price": "2000000.00",
+            "created_at": "2025-07-26 09:31:28",
+            "updated_at": "2025-07-26 09:31:28"
+        },
+        {
+            "id": 14,
+            "order_id": 4,
+            "product_variant_id": 5,
+            "quantity": 1,
+            "price": "2000000.00",
+            "created_at": "2025-07-26 09:31:28",
+            "updated_at": "2025-07-26 09:31:28"
+        }
+    ],
+    "reviews": [
+        {
+            "id": 1,
+            "user_id": 1,
+            "product_id": 1,
+            "rating": 4,
+            "cmt": null,
+            "created_at": "2025-07-26 07:46:06",
+            "updated_at": "2025-07-26 07:46:06"
+        },
+        {
+            "id": 2,
+            "user_id": 1,
+            "product_id": 9,
+            "rating": 5,
+            "cmt": null,
+            "created_at": "2025-07-26 07:52:48",
+            "updated_at": "2025-07-26 07:52:48"
+        },
+        {
+            "id": 3,
+            "user_id": 1,
+            "product_id": 2,
+            "rating": 5,
+            "cmt": null,
+            "created_at": "2025-07-26 07:53:02",
+            "updated_at": "2025-07-26 07:53:02"
+        },
+        {
+            "id": 4,
+            "user_id": 1,
+            "product_id": 8,
+            "rating": 5,
+            "cmt": null,
+            "created_at": "2025-07-26 07:53:11",
+            "updated_at": "2025-07-26 07:53:11"
+        }
+    ]
+}

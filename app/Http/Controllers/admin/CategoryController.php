@@ -3,18 +3,27 @@
 namespace App\Http\Controllers\admin;
 
 use App\Http\Controllers\Controller;
+
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class CategoryController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $cat = Category::get();
-        return view('admin.category.list',compact("cat"));
+        $query = Category::query();
+
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        $categories = $query->orderBy('id', 'desc')->paginate(10);
+
+        return view('admin.category.index', compact('categories'));
     }
 
     /**
@@ -23,6 +32,7 @@ class CategoryController extends Controller
     public function create()
     {
         //
+        return view('admin.category.create');
     }
 
     /**
@@ -30,16 +40,19 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        // Thêm mới danh mục
+        Category::create([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+            'status' => $request->status,
+        ]);
+        return redirect()->route('category.index')->with('success', 'Thêm thành công');
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -47,6 +60,8 @@ class CategoryController extends Controller
     public function edit(string $id)
     {
         //
+        $category = Category::find($id);
+        return view('admin.category.update', compact('category'));
     }
 
     /**
@@ -55,6 +70,12 @@ class CategoryController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        Category::find($id)->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('category.index')->with('success', 'Cập nhật thành công');
     }
 
     /**
@@ -63,5 +84,7 @@ class CategoryController extends Controller
     public function destroy(string $id)
     {
         //
+        Category::find($id)->delete();
+        return redirect()->route('category.index')->with('success', 'Xóa thành công');
     }
 }
