@@ -127,6 +127,7 @@
                                 </div>
                                 <button type="submit" class="primary-btn mr-2" id="addToCartBtn" disabled
                                     style="background-color: rgb(121, 121, 250)">Thêm vào giỏ hàng</button>
+                                <div id="addToCartError" class="mt-2" style="display: none;"></div>
                             </form>
                         @endif
                         <ul class="mt-3 list-unstyled" style="color: black">
@@ -335,12 +336,14 @@
         // Khi chọn màu
         document.querySelectorAll('.optioncolor').forEach(function(btn) {
             btn.addEventListener('click', function() {
+                // Xóa active và border của tất cả các nút màu
                 document.querySelectorAll('.optioncolor').forEach(el => {
-                    el.classList.remove('active', 'btn-success');
-                    el.classList.add('btn-outline-dark');
+                    el.classList.remove('active', 'border-dark', 'border-2');
+                    el.classList.add('border-1');
                 });
-                this.classList.add('active', 'btn-success');
-                this.classList.remove('btn-outline-dark');
+                // Thêm active và border đen đậm cho nút được chọn
+                this.classList.add('active', 'border-dark', 'border-2');
+                this.classList.remove('border-1');
 
                 selectedColor = this.getAttribute('data-color');
                 renderSizes();
@@ -352,7 +355,6 @@
                 document.getElementById('variantPrice').textContent =
                     "{{ number_format($product->price ?? 0, 0, ',', '.') }} đ";
             });
-
         });
 
         // Render size theo màu đã chọn
@@ -388,12 +390,14 @@
                 label.setAttribute('data-stock', s.stock);
                 label.innerHTML = `<span class="option-value">${s.value}</span>`;
                 label.addEventListener('click', function() {
+                    // Xóa active và border của tất cả các nút size
                     document.querySelectorAll('.optionsize').forEach(el => {
-                        el.classList.remove('active', 'btn-success');
-                        el.classList.add('btn-outline-secondary');
+                        el.classList.remove('active', 'border-dark', 'border-2');
+                        el.classList.add('border-1');
                     });
-                    this.classList.add('active', 'btn-success');
-                    this.classList.remove('btn-outline-secondary');
+                    // Thêm active và border đen đậm cho nút được chọn
+                    this.classList.add('active', 'border-dark', 'border-2');
+                    this.classList.remove('border-1');
 
                     document.getElementById('product_variant_id').value = this.getAttribute('data-variant');
                     document.getElementById('addToCartBtn').disabled = false;
@@ -419,17 +423,70 @@
             document.getElementById('addToCartBtn').disabled = true;
         });
 
+        // Hiển thị thông báo lỗi
+        let errorTimeout = null;
+        
+        function showError(message) {
+            const errorDiv = document.getElementById('addToCartError');
+            if (errorDiv) {
+                // Xóa bỏ thông báo cũ nếu có
+                errorDiv.innerHTML = '';
+                
+                // Tạo thông báo mới
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger alert-dismissible fade show';
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `
+                    <i class="fa-solid fa-circle-exclamation me-2"></i>
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                errorDiv.appendChild(alertDiv);
+                errorDiv.style.display = 'block';
+                
+                // Hủy timeout cũ nếu có
+                if (errorTimeout) {
+                    clearTimeout(errorTimeout);
+                }
+                
+                // Tự động ẩn sau 5 giây
+                errorTimeout = setTimeout(() => {
+                    errorDiv.style.display = 'none';
+                }, 5000);
+                
+                // Cuộn đến thông báo lỗi
+                errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+
         // Ngăn submit nếu chưa chọn màu và size hoặc vượt quá tồn kho biến thể
         document.getElementById('addToCartForm').addEventListener('submit', function(e) {
             const quantity = parseInt(document.querySelector('input[name="quantity"]').value) || 1;
-            if (!document.getElementById('product_variant_id').value) {
+            const colorSelected = document.querySelector('.optioncolor.active');
+            const sizeSelected = document.querySelector('.optionsize.active');
+            
+            // Ẩn thông báo lỗi cũ nếu có
+            const errorDiv = document.getElementById('addToCartError');
+            if (errorDiv) {
+                errorDiv.style.display = 'none';
+            }
+            
+            // Chỉ hiển thị thông báo khi chưa chọn đủ thông tin
+            if (!colorSelected || !sizeSelected) {
                 e.preventDefault();
-                alert('Vui lòng chọn màu và size trước khi thêm vào giỏ hàng!');
+                showError('Vui lòng chọn đầy đủ màu và size trước khi thêm vào giỏ hàng!');
                 return;
             }
+            
+            // Các kiểm tra khác (không hiển thị thông báo ở đây)
+            if (!document.getElementById('product_variant_id').value) {
+                e.preventDefault();
+                return;
+            }
+            
             if (quantity > currentVariantStock) {
                 e.preventDefault();
-                alert('Số lượng bạn chọn vượt quá số lượng còn lại của biến thể này!');
                 return;
             }
         });

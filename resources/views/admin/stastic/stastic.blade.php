@@ -94,6 +94,20 @@
                 </h3>
                 <div class="value">{{ number_format($totalRevenue) }} ₫</div>
             </div>
+            <div class="card" style="grid-column: span 2;">
+                <h3>
+                    <svg fill="#a03d07" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="#a03d07" stroke-width="2" fill="none"/></svg>
+                    Doanh thu theo khoảng thời gian
+                </h3>
+                <div class="mb-2">
+                    <input type="date" id="startDate" class="form-control form-control-sm mb-2" value="{{ now()->startOfMonth()->format('Y-m-d') }}">
+                    <input type="date" id="endDate" class="form-control form-control-sm" value="{{ now()->format('Y-m-d') }}">
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <button id="getRevenueBtn" class="btn btn-sm btn-primary">Xem doanh thu</button>
+                    <div id="dateRangeRevenue" class="fw-bold" style="font-size: 1.2rem; color: #000;">0 ₫</div>
+                </div>
+            </div>
             <div class="card">
                 <h3><svg fill="#a03d07" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 8h8v8H8z"/></svg>Tổng số đơn</h3>
                 <div class="value">{{ number_format($Orders) }}</div>
@@ -146,6 +160,47 @@
     </div>
 
     <script>
+    // Hàm định dạng số tiền
+    function formatMoney(amount) {
+        return new Intl.NumberFormat('vi-VN').format(amount) + ' ₫';
+    }
+
+    // Xử lý sự kiện khi nhấn nút xem doanh thu
+    document.addEventListener('DOMContentLoaded', function() {
+        const getRevenueBtn = document.getElementById('getRevenueBtn');
+        
+        if (getRevenueBtn) {
+            getRevenueBtn.addEventListener('click', function() {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                
+                if (!startDate || !endDate) {
+                    alert('Vui lòng chọn đầy đủ ngày bắt đầu và ngày kết thúc');
+                    return;
+                }
+                
+                if (new Date(startDate) > new Date(endDate)) {
+                    alert('Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc');
+                    return;
+                }
+                
+                // Gọi API để lấy doanh thu theo khoảng thời gian
+                fetch(`/admin/statistics/revenue?start_date=${startDate}&end_date=${endDate}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('dateRangeRevenue').textContent = formatMoney(data.revenue);
+                    })
+                    .catch(error => {
+                        console.error('Lỗi khi lấy dữ liệu doanh thu:', error);
+                        alert('Có lỗi xảy ra khi lấy dữ liệu doanh thu');
+                    });
+            });
+            
+            // Tự động gọi lấy doanh thu khi trang được tải
+            getRevenueBtn.click();
+        }
+    });
+
     window.renderStatsChart = function () {
         const chartCanvas = document.getElementById('monthlyChart');
         if (!chartCanvas || typeof Chart === 'undefined') {

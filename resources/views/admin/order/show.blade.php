@@ -1,7 +1,13 @@
 @extends('admin.layout.master')
 @section('main')
     <div class="container" style="max-width: 900px;">
-        <div class="row justify-content-center mt-5">
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        <div class="row justify-content-center mt-3">
             <div class="col-md-12">
                 <div class="card shadow-lg" style="border-radius: 16px;">
                     <div class="card-header text-center"

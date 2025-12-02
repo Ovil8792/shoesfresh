@@ -174,6 +174,44 @@ class StasticController extends Controller
         
     }
 
+    /**
+     * Get revenue for a specific date range
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDateRangeRevenue(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date'
+        ]);
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        // Calculate online revenue
+        $onlineRevenue = DB::table('orders')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])
+            ->sum('total_amount');
+
+        // Calculate POS revenue
+        $posRevenue = DB::table('pos_orders')
+            ->where('status', 'Đã thanh toán')
+            ->whereBetween('created_at', [$startDate, $endDate . ' 23:59:59'])
+            ->sum('total_amount');
+
+        $totalRevenue = $onlineRevenue + $posRevenue;
+
+        return response()->json([
+            'success' => true,
+            'revenue' => $totalRevenue,
+            'online_revenue' => $onlineRevenue,
+            'pos_revenue' => $posRevenue
+        ]);
+    }
+
     protected function getTopProducts($start, $end, $limit = 4, $direction = 'desc')
     {
         $orderDirection = $direction === 'asc' ? 'asc' : 'desc';
