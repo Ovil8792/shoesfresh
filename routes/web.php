@@ -271,6 +271,7 @@ Route::get('/profile/orders/{id}', [OrderHistoryController::class, 'show'])->nam
 Route::post('/profile/orders/{id}/cancel', [OrderHistoryController::class, 'cancel'])->name('profile.orders.cancel');
 // Route cho thống kê
 Route::get('/admin/stastic', [StasticController::class, 'index']);
+Route::get('/admin/statistics/revenue', [StasticController::class, 'getDateRangeRevenue'])->name('admin.statistics.revenue');
 
 // Bán hàng tại quầy
 Route::prefix('pos')->group(function () {

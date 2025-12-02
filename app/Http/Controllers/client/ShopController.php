@@ -159,6 +159,6 @@ class ShopController extends Controller
                 'quantity' => $quantity,
             ]);
         }
-        return redirect()->back()->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
+        return redirect()->route('shop.cart.index')->with('success', 'Sản phẩm đã được thêm vào giỏ hàng.');
     }
 }

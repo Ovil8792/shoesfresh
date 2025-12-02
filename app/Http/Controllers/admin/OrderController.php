@@ -44,16 +44,12 @@ class OrderController extends Controller
             Order::STATUS_CANCELLED,
         ];
 
-        // Không có tham số => mặc định processing
-        if (!$request->has('status')) {
-            $status = Order::STATUS_PROCESSING;
+        // Mặc định hiển thị tất cả đơn hàng
+        $status = (string) $request->query('status', '');
+        
+        // Nếu có chọn lọc trạng thái thì mới thêm điều kiện where
+        if ($status !== '' && in_array($status, $allowed, true)) {
             $query->where('status', $status);
-        } else {
-            // Có tham số: '' = tất cả (bỏ lọc); giá trị khác => lọc theo
-            $status = (string) $request->query('status', '');
-            if ($status !== '' && in_array($status, $allowed, true)) {
-                $query->where('status', $status);
-            }
         }
 
         $orders = $query->latest()->paginate(15)->appends($request->query());
@@ -106,11 +102,21 @@ class OrderController extends Controller
         ]);
 
         $order = Order::findOrFail($id);
+        $oldStatus = $order->status; // Lưu trạng thái cũ
         $order->status = $request->input('status');
         $order->cancel_reason = $request->input('cancel_reason');
         $order->save();
 
-        return back()->with('success', 'Cập nhật trạng thái thành công!');
+        // Chuyển hướng về trang trước đó với tham số status
+        $redirectUrl = url()->previous();
+        
+        // Nếu URL hiện tại không có tham số status, thêm nó vào
+        if (strpos($redirectUrl, 'status=') === false) {
+            $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
+            $redirectUrl .= $separator . 'status=' . $oldStatus;
+        }
+
+        return redirect($redirectUrl)->with('success', 'Cập nhật trạng thái thành công!');
     }
 
     public function delete($id)

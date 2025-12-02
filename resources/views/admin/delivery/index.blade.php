@@ -29,69 +29,45 @@
                             <button type="submit" class="btn btn-outline-primary btn-sm">Tìm kiếm</button>
                         </form>
                     </div>
-
+                    <!-- Danh sách đơn hàng chờ giao -->
+                    <h5 class="mb-3">Đơn hàng chờ giao</h5>
+                    @if(isset($availableDeliveries) && $availableDeliveries->count() > 0)
                     <div class="table-responsive">
                         <table class="table table-striped table-bordered align-middle">
-                            <thead class="table-white">
+                            <thead class="table-warning">
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Đơn hàng</th>
-                                    <th>Người giao</th>
-                                    {{-- <th>Trạng thái</th> --}}
+                                    <th>Mã đơn hàng</th>
+                                    <th>Khách hàng</th>
+                                    <th>Số điện thoại</th>
                                     <th>Địa chỉ giao hàng</th>
                                     <th>Ngày tạo</th>
-                                    {{-- <th>Ngày cập nhật</th> --}}
                                     <th class="text-center">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @php $hasDelivery = false; @endphp
-                                @foreach ($deliveries as $delivery)
-                                    @if ($delivery->order && $delivery->order->status == 'delivering')
-                                        @php $hasDelivery = true; @endphp
-                                        <tr>
-                                            <td>{{ $delivery->id }}</td>
-                                            <td>{{ $delivery->order_id }}</td>
-                                            <td>{{ $delivery->user->name ?? 'Chưa có' }}</td>
-                                            <td>{{ $delivery->order->shipping_address }}</td>
-                                            <td>{{ $delivery->created_at }}</td>
-                                            <td class="text-center">
-                                                <a href="{{ route('delivery.show', $delivery->id) }}"
-                                                    class="btn btn-sm btn-info rounded-pill px-3 py-1 d-inline-flex align-items-center me-1"
-                                                    title="Xem chi tiết">
-                                                    <i class="fa-solid fa-eye me-1"></i>
-                                                </a>
-                                                @if (empty($delivery->user_id))
-                                                    <a href="{{ route('delivery.accept', $delivery->id) }}"
-                                                        onclick="return confirm('Bạn có chắc muốn nhận đơn hàng này?')"
-                                                        class="btn btn-sm btn-success rounded-pill px-3 py-1 d-inline-flex align-items-center"
-                                                        title="Nhận đơn">
-                                                        <i class="bi bi-check-circle-fill me-1"></i>
-                                                    </a>
-                                                @else
-                                                    <a href="{{ route('delivery.cancel', $delivery->id) }}"
-                                                        onclick="return confirm('Bạn có chắc muốn huỷ nhận đơn hàng này?')"
-                                                        class="btn btn-sm btn-danger rounded-pill px-3 py-1 d-inline-flex align-items-center"
-                                                        title="Huỷ nhận">
-                                                        <i class="bi bi-x-circle-fill me-1"></i>
-                                                    </a>
-                                                @endif
-                                            </td>
-
-                                        </tr>
-                                    @endif
+                                @foreach ($availableDeliveries as $order)
+                                <tr>
+                                    <td>#{{ $order->id }}</td>
+                                    <td>{{ $order->name }}</td>
+                                    <td>{{ $order->phone }}</td>
+                                    <td>{{ $order->shipping_address }}</td>
+                                    <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
+                                    <td class="text-center">
+                                        <a href="{{ route('delivery.show', $order->id) }}" class="btn btn-sm btn-primary">
+                                            <i class="bi bi-eye"></i> Xem chi tiết
+                                        </a>
+                                        <form action="{{ route('delivery.accept', $order->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                        </form>
+                                    </td>
+                                </tr>
                                 @endforeach
-                                @if (!$hasDelivery)
-                                    <tr>
-                                        <td colspan="5" class="text-center text-danger">Chưa có đơn giao hàng</td>
-                                    </tr>
-                                @endif
                             </tbody>
                         </table>
                     </div>
-
-                    {{-- Pagination --}}
-                    {{-- <div class="mt-3">{{ $deliveries->appends(request()->query())->links() }}</div> --}}
+                    @else
+                    <div class="alert alert-info">Không có đơn hàng nào chờ giao.</div>
+                    @endif
                 </div>
             </div>
         </div>

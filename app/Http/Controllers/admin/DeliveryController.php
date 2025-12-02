@@ -15,9 +15,19 @@ class DeliveryController extends Controller
 {
     public function index()
     {
-        //
-        $deliveries = Delivery::all();
-        return view('admin.delivery.index', compact('deliveries'));
+        // Lấy tất cả đơn hàng có trạng thái 'delivering' và đã được giao cho shipper
+        $deliveries = Delivery::with(['order', 'user'])
+            ->whereHas('order', function($query) {
+                $query->where('status', 'delivering');
+            })
+            ->get();
+            
+        // Lấy danh sách đơn hàng có trạng thái 'delivering' nhưng chưa có shipper nhận
+        $availableDeliveries = Order::where('status', 'delivering')
+            ->whereDoesntHave('delivery')
+            ->get();
+            
+        return view('admin.delivery.index', compact('deliveries', 'availableDeliveries'));
     }
 
     public function show($id)
