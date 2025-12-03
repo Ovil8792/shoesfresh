@@ -212,16 +212,17 @@ class CheckoutController extends Controller
         }
 
         // Build VNPAY data (KHÔNG truyền vnp_IpnUrl vào inputData)
-        $vnp_TmnCode    = env('VNPAY_TMN_CODE', 'YIR2W0WO');
-        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'A01P7Y76ANEN4524PEUIVDIBHTSA04BI');
+        $vnp_TmnCode = "QM5USC8V"; //Mã định danh merchant kết nối (Terminal Id)
+        $vnp_HashSecret = "0AP6TPG3N13J17TD361LDDE8FU348DP4"; //Secret key
         $vnp_Url        = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         $vnp_ReturnUrl  = env('APP_URL') . "/checkout/vnpay-return";
         $orderId        = $order->id;
         $orderDesc      = "Thanh toan don hang {$orderId}";
+        $vnp_BankCode = "VNBANK"; //Mã phương thức thanh toán
         $orderType      = "billpayment";
         $amount         = (int)$cartFinalTotal * 100;
         $locale         = "vn";
-        $ipAddr         = $request->ip();
+        $vnp_IpAddr = $_SERVER['REMOTE_ADDR']; //IP Khách hàng thanh toán
         $expire         = date('YmdHis', strtotime('+15 minutes'));
 
         $inputData = [
@@ -231,15 +232,17 @@ class CheckoutController extends Controller
             "vnp_Command"    => "pay",
             "vnp_CreateDate" => date('YmdHis'),
             "vnp_CurrCode"   => "VND",
-            "vnp_IpAddr"     => $ipAddr,
+            "vnp_IpAddr"     => $vnp_IpAddr,
             "vnp_Locale"     => $locale,
             "vnp_OrderInfo"  => $orderDesc,
             "vnp_OrderType"  => $orderType,
             "vnp_ReturnUrl"  => $vnp_ReturnUrl,
             "vnp_TxnRef"     => $orderId,
-            "vnp_ExpireDate" => $expire
+            "vnp_ExpireDate" => $expire,
         ];
-
+        if (isset($vnp_BankCode) && $vnp_BankCode != "") {
+            $inputData['vnp_BankCode'] = $vnp_BankCode;
+        }
         // Sắp xếp và urlencode value cho hashData
         ksort($inputData);
         $hashdataArr = [];
@@ -248,6 +251,8 @@ class CheckoutController extends Controller
         }
         $hashdata = implode('&', $hashdataArr);
         $vnpSecureHash = hash_hmac('sha512', $hashdata, $vnp_HashSecret);
+        $vnp_BankCode = $inputData['vnp_BankCode']; //Ngân hàng thanh toán
+
 
         // Build query đúng chuẩn RFC3986 (encode chuẩn cho VNPAY)
         $query   = http_build_query($inputData, '', '&', PHP_QUERY_RFC3986);
@@ -267,7 +272,7 @@ class CheckoutController extends Controller
     public function vnpayReturn(Request $request)
     {
         $input = $request->all();
-        $vnp_HashSecret = env('VNPAY_HASH_SECRET', 'A01P7Y76ANEN4524PEUIVDIBHTSA04BI');
+        $vnp_HashSecret = env('VNPAY_HASH_SECRET', '0AP6TPG3N13J17TD361LDDE8FU348DP4');
         $vnp_SecureHash = $input['vnp_SecureHash'] ?? '';
         unset($input['vnp_SecureHash'], $input['vnp_SecureHashType']);
         ksort($input);
