@@ -1,130 +1,3600 @@
 <?php
 
 namespace App\Http\Controllers\admin;
-
 use App\Http\Controllers\Controller;
-use App\Models\Order;
+
 use Illuminate\Http\Request;
+use App\Models\BlogCategory;
 
-class OrderController extends Controller
+class BlogCategoryController extends Controller
 {
-    public function index(Request $request)
-    {
-        $query = Order::query();
+    /**
+     * Display a listing of the resource.
+     */
 
-        // Tìm kiếm theo keyword
-        if ($request->filled('keyword')) {
-            $kw = trim($request->keyword);
-            $kwLike   = '%'.$kw.'%';
-            $kwDigits = preg_replace('/\D+/', '', $kw);
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
 
-            $query->where(function ($q) use ($kwLike, $kwDigits) {
-                $q->where('name', 'like', $kwLike)
-                    ->orWhere('email', 'like', $kwLike)
-                    ->orWhere('phone', 'like', $kwLike)
-                    ->orWhere('shipping_address', 'like', $kwLike);
-
-                if ($kwDigits !== '') {
-                    $q->orWhereRaw(
-                        "REPLACE(REPLACE(REPLACE(phone,' ',''),'.',''),'-','') LIKE ?",
-                        ['%'.$kwDigits.'%']
-                    );
-                }
-            });
-        }
-
-        // ===== Lọc trạng thái =====
-        // Hợp lệ (đồng bộ với Model Order)
-        $allowed = [
-            Order::STATUS_PROCESSING,
-            Order::STATUS_PENDING,
-            Order::STATUS_PAID,
-            Order::STATUS_DELIVERING, // dùng delivering cho thống nhất
-            Order::STATUS_COMPLETED,
-            Order::STATUS_CANCELLED,
-        ];
-
-        // Mặc định hiển thị tất cả đơn hàng
-        $status = (string) $request->query('status', '');
-        
-        // Nếu có chọn lọc trạng thái thì mới thêm điều kiện where
-        if ($status !== '' && in_array($status, $allowed, true)) {
-            $query->where('status', $status);
-        }
-
-        $orders = $query->latest()->paginate(15)->appends($request->query());
-
-        // Options cho dropdown ("" = tất cả)
-        $statusOptions = [
-            ''                          => 'Tất cả trạng thái',
-            Order::STATUS_PROCESSING     => 'Đang xử lý',
-            Order::STATUS_PENDING        => 'Pending',
-            Order::STATUS_PAID           => 'Đã thanh toán',
-            Order::STATUS_DELIVERING     => 'Đang giao',
-            Order::STATUS_COMPLETED      => 'Hoàn tất',
-            Order::STATUS_CANCELLED      => 'Đã hủy',
-        ];
-
-        return view('admin.order.index', compact('orders', 'status', 'statusOptions'));
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
     }
 
-    public function show($id)
-    {
-        $order = Order::with([
-            'orderItems.variant.product.category',
-            'user:id,name',
-            'voucher:id,code',
-            'delivery',
-        ])->findOrFail($id);
+    $blogCategories = $query->orderBy('id', 'desc')->get();
 
-        return view('admin.order.show', compact('order'));
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
     }
 
-    public function edit(Order $order)
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
     {
         //
     }
 
-    public function updateStatus(Request $request, $id)
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
     {
-        $validStatuses = implode(',', [
-            Order::STATUS_PROCESSING,
-            Order::STATUS_PENDING,
-            Order::STATUS_PAID,
-            Order::STATUS_DELIVERING,
-            Order::STATUS_COMPLETED,
-            Order::STATUS_CANCELLED,
-        ]);
-
-        $request->validate([
-            'status' => 'required|in:'.$validStatuses,
-            'cancel_reason' => 'required_if:status,'.Order::STATUS_CANCELLED.'|nullable|string|max:255',
-        ]);
-
-        $order = Order::findOrFail($id);
-        $oldStatus = $order->status; // Lưu trạng thái cũ
-        $order->status = $request->input('status');
-        $order->cancel_reason = $request->input('cancel_reason');
-        $order->save();
-
-        // Chuyển hướng về trang trước đó với tham số status
-        $redirectUrl = url()->previous();
-        
-        // Nếu URL hiện tại không có tham số status, thêm nó vào
-        if (strpos($redirectUrl, 'status=') === false) {
-            $separator = strpos($redirectUrl, '?') !== false ? '&' : '?';
-            $redirectUrl .= $separator . 'status=' . $oldStatus;
-        }
-
-        return redirect($redirectUrl)->with('success', 'Cập nhật trạng thái thành công!');
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
     }
 
-    public function delete($id)
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
     {
-        $order = Order::findOrFail($id);
-        $order->orderItems()->delete();
-        $order->delete();
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
 
-        return redirect()->route('order.index')->with('success', 'Đã xoá đơn hàng thành công.');
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
+    }
+}
+<?php
+
+namespace App\Http\Controllers\admin;
+use App\Http\Controllers\Controller;
+
+use Illuminate\Http\Request;
+use App\Models\BlogCategory;
+
+class BlogCategoryController extends Controller
+{
+    /**
+     * Display a listing of the resource.
+     */
+
+public function index(Request $request)
+{
+    $query = BlogCategory::query();
+
+    if ($request->filled('keyword')) {
+        $query->where('name', 'like', '%' . $request->keyword . '%');
+    }
+
+    $blogCategories = $query->orderBy('id', 'desc')->get();
+
+    return view('admin.blogCategory.index', compact('blogCategories'));
+}
+
+    /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        //
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug',
+        ]);
+        BlogCategory::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Thêm thành công');
+    }
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(string $id)
+    {
+        //
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(string $id)
+    {
+        $blogCategory = BlogCategory::findOrFail($id);
+        return view('admin.blogCategory.update', compact('blogCategory'));
+    }
+
+    /**
+     * Update the specified resource in storage.
+     */
+    public function update(Request $request, string $id)
+    {
+        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:blog_categories,slug,' . $id,
+        ]);
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->update([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'status' => $request->status,
+        ]);
+        return redirect()->route('blog_category.index')->with('success', 'Cập nhật thành công');
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(string $id)
+    {
+        //
+        $blogCategory = BlogCategory::findOrFail($id);
+        $blogCategory->delete();
+        return redirect()->route('blog_category.index')->with('success', 'Xóa thành công');
     }
 }
