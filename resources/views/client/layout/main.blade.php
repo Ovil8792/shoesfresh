@@ -197,7 +197,6 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script> All r
 	<script src="{{ asset(url("")) }}/assets/js/jquery.magnific-popup.min.js"></script>
 	<script src="{{ asset(url("")) }}/assets/js/owl.carousel.min.js"></script>
 	<!--gmaps Js-->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCjCGmQ0Uq4exrzdcL6rvxywDDOvfAu6eE"></script>
 	<script src="{{ asset(url("")) }}/assets/js/gmaps.min.js"></script>
 	<script src="{{ asset(url("")) }}/assets/js/main.js"></script>
 </body>
