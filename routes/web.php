@@ -37,6 +37,7 @@ use App\Http\Controllers\admin\ProductDiscountController;
 use App\Http\Controllers\client\BlogController;
 
 
+
 // Route cho Admin
 Route::prefix('admin')->group(function () {
     // Form login và xử lý login KHÔNG cần middleware
@@ -85,7 +86,6 @@ Route::prefix('admin')->group(function () {
                 Route::post('store', [SizeController::class, 'store'])->name('product.size.store');
                 Route::get('delete/{id}', [SizeController::class, 'destroy'])->name('product.size.delete');
             });
-
         });
         // Quản lý thương hiệu
         Route::prefix('brand')->group(function () {
@@ -148,7 +148,6 @@ Route::prefix('admin')->group(function () {
             Route::get('show/{id}', [CommentController::class, 'show'])->name('comment.show');
             Route::get('edit/{id}', [CommentController::class, 'edit'])->name('comment.edit');
             Route::get('update/{id}', [CommentController::class, 'update'])->name('comment.update');
-
         });
 
         // Quản lý Blog
@@ -207,38 +206,38 @@ Route::prefix('/')->group(function () {
 
 
         // Route cho giỏ hàng
-    Route::prefix('cart')->group(function () {
+        Route::prefix('cart')->group(function () {
             Route::get('', [ShopCartController::class, 'index'])->name('shop.cart.index');
             Route::get('remove/{id}', [ShopCartController::class, 'removeCart'])->name('cart.remove');
             Route::post('/cart/update-quantity', [ShopCartController::class, 'updateQuantity'])->name('cart.updateQuantity');
-    });
+        });
         //route contact ở phía client
-    Route::prefix('contact')->group(function () {
+        Route::prefix('contact')->group(function () {
             Route::get('', [ContactClientController::class, 'index'])->name('shop.contact.index');
             Route::post('', [ContactClientController::class, 'submit'])->name('shop.contact.submit');
-    });
-    Route::prefix('feedback')->group(function () {
+        });
+        Route::prefix('feedback')->group(function () {
             Route::get('', [FeedbackClientController::class, 'index'])->name('shop.feedback.index');
             Route::post('', [FeedbackClientController::class, 'submit'])->name('shop.feedback.submit');
-    });
+        });
         // Route cho nhập voucher
         Route::post('/cart/apply-voucher', [ShopCartController::class, 'applyVoucher'])->name('cart.applyVoucher');
         Route::post('/cart/remove-voucher', [ShopCartController::class, 'removeVoucher'])->name('cart.removeVoucher');
         //route tìm kiếm ở phía client
-    Route::get('/search', [SearchProductController::class, 'search'])->name('product.search');
+        Route::get('/search', [SearchProductController::class, 'search'])->name('product.search');
         // route cho bình luận ở client
-    Route::post('/shop/comment/{id}', [ProductCommentController::class, 'store'])->name('product.comment.store');
-
-});
-        // Check out cline
+        Route::post('/shop/comment/{id}', [ProductCommentController::class, 'store'])->name('product.comment.store');
+    });
+    // Check out cline
     Route::prefix('checkout')->group(function () {
         Route::get('', [CheckoutController::class, 'index'])->name('checkout.index');
         Route::post('', [CheckoutController::class, 'submit'])->name('checkout.submit');
         Route::post('vnpay', [CheckoutController::class, 'vnpay'])->name('checkout.vnpay');
         Route::get('success/{orderId}', [CheckoutController::class, 'success'])->name('checkout.success');
         Route::get('vnpay-return', [CheckoutController::class, 'vnpayReturn'])->name('checkout.vnpay_return');
-        Route::match(['get', 'post'], 'vnpay-ipn', [CheckoutController::class, 'vnpayIpn'])->name('checkout.vnpay_ipn');
+        Route::post('vnpay-ipn', [CheckoutController::class, 'vnpayIpn'])->name('vnpay.ipn');
     });
+
     // Route cho blog
     Route::prefix('blog')->group(function () {
         Route::get('', [BlogController::class, 'index'])->name('blog.index');
@@ -286,6 +285,5 @@ Route::prefix('pos')->group(function () {
     Route::post('/check-voucher', [PosOrderController::class, 'checkVoucher'])->name('pos.checkVoucher');
 
     // Thanh toán VNPAY
-Route::get('/vnpay-return', [PosOrderController::class, 'vnpayReturn'])->name('vnpay.return');
-
+    Route::get('/vnpay-return', [PosOrderController::class, 'vnpayReturn'])->name('vnpay.return');
 });
