@@ -90,16 +90,31 @@ class PosOrderController extends Controller
             ]);
         }
 
+        // Lấy voucher từ session nếu có
+        $voucher = session('voucher');
+        $voucherId = $voucher ? $voucher->id : null;
+
         // Cập nhật đơn hàng
         $order->total_amount     = $request->total_amount;
         $order->discount_applied = $discount;
         $order->payment_method   = $request->payment_method;
+        $order->voucher_id       = $voucherId;
         $order->updated_at       = now();
 
         // Xử lý theo phương thức thanh toán
         if ($order->payment_method === 'Tiền mặt') {
             $order->status = 'Đã thanh toán';
             $order->save();
+
+            // Trừ usage_limit của voucher khi thanh toán thành công
+            if ($voucherId) {
+                $voucherModel = Voucher::find($voucherId);
+                if ($voucherModel && $voucherModel->usage_limit > 0) {
+                    $voucherModel->usage_limit -= 1;
+                    $voucherModel->used_count += 1;
+                    $voucherModel->save();
+                }
+            }
 
             // Trừ kho
             $items = PosOrderItem::where('pos_order_id', $order->id)->get();
@@ -110,6 +125,9 @@ class PosOrderController extends Controller
                     $variant->save();
                 }
             }
+
+            // Xóa voucher khỏi session sau khi thanh toán thành công
+            session()->forget('voucher');
 
             return redirect()->route('pos.bill', $order->id);
         }
@@ -181,6 +199,16 @@ class PosOrderController extends Controller
 
             return redirect()->route('pos.bill', $order->id)->with('message', 'Thanh toán thành công!');
         } else {
+            // Hoàn lại usage_limit của voucher nếu đơn hàng bị hủy
+            if ($order->voucher_id) {
+                $voucherModel = Voucher::find($order->voucher_id);
+                if ($voucherModel) {
+                    $voucherModel->usage_limit += 1;
+                    $voucherModel->used_count = max(0, $voucherModel->used_count - 1);
+                    $voucherModel->save();
+                }
+            }
+            
             // KHÔNG đổi trạng thái, giữ là "Chờ thanh toán"
             $order->status = 'Đã huỷ';
             $order->save();
@@ -246,26 +274,8 @@ class PosOrderController extends Controller
             return response()->json(['success' => false, 'message' => 'Đơn hàng chưa đủ giá trị tối thiểu để áp dụng mã!']);
         }
 
-        // Kiểm tra mã hiện tại trong session
-        $currentVoucher = session('voucher');
-        if ($currentVoucher && $currentVoucher->code === $voucher->code && session()->has('voucher_applied')) {
-            // Không trừ tiếp nếu đang dùng chính mã này
-        } else {
-            // Hoàn trả mã cũ nếu có
-            if ($currentVoucher && session()->has('voucher_applied')) {
-                $currentVoucher->usage_limit += 1;
-                $currentVoucher->used_count -= 1;
-                $currentVoucher->save();
-                session()->forget('voucher_applied');
-            }
-
-            // Áp dụng mã mới
-            $voucher->usage_limit -= 1;
-            $voucher->used_count += 1;
-            $voucher->save();
-            session(['voucher_applied' => true]);
-        }
-
+        // Chỉ lưu voucher vào session, không trừ usage_limit ở đây
+        // usage_limit sẽ được trừ khi thanh toán thành công
         session(['voucher' => $voucher]);
 
         // Tính giảm giá

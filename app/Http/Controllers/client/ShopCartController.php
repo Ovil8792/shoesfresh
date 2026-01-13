@@ -35,7 +35,21 @@ class ShopCartController extends Controller
     }
     public function applyVoucher(Request $request)
     {
+        // Kiểm tra voucher có tồn tại không (kể cả bị soft delete)
+        $voucherExists = Voucher::withTrashed()->where('code', $request->voucher_code)->exists();
+        
+        if (!$voucherExists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Mã giảm giá không tồn tại.'
+            ]);
+        }
+
+        // Chỉ lấy voucher chưa bị xóa và còn hiệu lực
         $voucher = Voucher::where('code', $request->voucher_code)
+            ->where(function($q) {
+                $q->whereNull('valid_from')->orWhere('valid_from', '<=', now());
+            })
             ->where(function($q) {
                 $q->whereNull('valid_to')->orWhere('valid_to', '>=', now());
             })
@@ -55,24 +69,8 @@ class ShopCartController extends Controller
             ]);
         }
 
-        $currentVoucher = session('voucher');
-        if ($currentVoucher && $currentVoucher->code === $voucher->code && session()->has('voucher_applied')) {
-        } else {
-            // Nếu đang dùng mã khác hoàn trả mã cũ
-            if ($currentVoucher && session()->has('voucher_applied')) {
-                $currentVoucher->usage_limit += 1;
-                $currentVoucher->used_count -= 1;
-                $currentVoucher->save();
-                session()->forget('voucher_applied');
-            }
-
-            // Áp dụng mã mới
-            $voucher->usage_limit -= 1;
-            $voucher->used_count += 1;
-            $voucher->save();
-            session(['voucher_applied' => true]);
-        }
-
+        // Chỉ lưu voucher vào session, không trừ usage_limit ở đây
+        // usage_limit sẽ được trừ khi đặt hàng thành công
         session(['voucher' => $voucher]);
 
         $cartItems = CartItem::with(['variant.product', 'variant.size', 'variant.color'])
@@ -174,15 +172,8 @@ class ShopCartController extends Controller
     }
     public function removeVoucher()
     {
-        $voucher = session('voucher');
-
-        if ($voucher && session()->has('voucher_applied')) {
-            $voucher->usage_limit += 1;
-            $voucher->used_count -= 1;
-            $voucher->save();
-            session()->forget('voucher_applied');
-        }
-
+        // Chỉ xóa voucher khỏi session, không cần hoàn lại usage_limit
+        // vì chưa trừ khi apply
         session()->forget('voucher');
 
         $cartItems = CartItem::with(['variant.product', 'variant.size', 'variant.color'])

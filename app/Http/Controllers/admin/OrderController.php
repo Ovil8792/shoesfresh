@@ -103,6 +103,17 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($id);
         $oldStatus = $order->status; // Lưu trạng thái cũ
+        
+        // Nếu chuyển sang trạng thái cancelled và đơn hàng có voucher, hoàn lại usage_limit
+        if ($request->input('status') === Order::STATUS_CANCELLED && $oldStatus !== Order::STATUS_CANCELLED && $order->voucher_id) {
+            $voucher = \App\Models\Voucher::find($order->voucher_id);
+            if ($voucher) {
+                $voucher->usage_limit += 1;
+                $voucher->used_count = max(0, $voucher->used_count - 1);
+                $voucher->save();
+            }
+        }
+        
         $order->status = $request->input('status');
         $order->cancel_reason = $request->input('cancel_reason');
         $order->save();
