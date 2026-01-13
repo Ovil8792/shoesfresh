@@ -38,24 +38,35 @@
                 </div>
                 <div class="col-md-6">
                     @php
-                        if ($order->payment_method === 'COD') {
-                            $paymentLabel = 'Thanh toán khi nhận hàng';
-                            $showStatus = false;
-                        } elseif ($order->payment_method === 'VNPAY') {
+                        $pm = strtoupper((string) $order->payment_method);
+                        $st = (string) $order->status;
+                        
+                        // Logic: VNPAY → Đã thanh toán (trừ khi cancelled)
+                        // COD → Chưa thanh toán (nếu chưa completed), Đã thanh toán (nếu completed)
+                        if ($pm === 'VNPAY' && $st !== 'cancelled') {
                             $paymentLabel = 'VNPAY';
-                            $paymentStatus = $order->status === 'pending' ? 'Chưa thanh toán' : 'Đã thanh toán';
-                            $showStatus = true;
+                            $paymentStatus = 'Đã thanh toán';
+                            $paymentClass = 'success';
+                        } elseif ($pm === 'COD') {
+                            $paymentLabel = 'Thanh toán khi nhận hàng';
+                            if ($st === 'completed') {
+                                $paymentStatus = 'Đã thanh toán';
+                                $paymentClass = 'success';
+                            } else {
+                                $paymentStatus = 'Chưa thanh toán';
+                                $paymentClass = 'warning';
+                            }
                         } else {
-                            $paymentLabel = $order->payment_method;
-                            $paymentStatus = 'Không xác định';
-                            $showStatus = true;
+                            $paymentLabel = ucfirst($order->payment_method);
+                            $paymentStatus = 'Chưa xác định';
+                            $paymentClass = 'secondary';
                         }
                     @endphp
 
                     <p><b>Thanh toán:</b> {{ $paymentLabel }}
-                        @if($showStatus)
-                            - <span class="fw-bold text-{{ $paymentStatus === 'Đã thanh toán' ? 'success' : 'danger' }}">{{ $paymentStatus }}</span>
-                        @endif
+                        <span class="badge bg-{{ $paymentClass }}">
+                            {{ $paymentStatus }}
+                        </span>
                     </p>
 
                 </div>

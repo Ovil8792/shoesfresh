@@ -89,13 +89,6 @@
         <div class="cards">
             <div class="card" style="grid-column: span 2;">
                 <h3>
-                    <svg fill="#a03d07" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/><circle cx="12" cy="12" r="10" stroke="#a03d07" stroke-width="2" fill="none"/></svg>
-                    Tổng doanh thu tháng này
-                </h3>
-                <div class="value">{{ number_format($totalRevenue) }} ₫</div>
-            </div>
-            <div class="card" style="grid-column: span 2;">
-                <h3>
                     <svg fill="#a03d07" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" stroke="#a03d07" stroke-width="2" fill="none"/></svg>
                     Doanh thu theo khoảng thời gian
                 </h3>
@@ -110,31 +103,23 @@
             </div>
             <div class="card">
                 <h3><svg fill="#a03d07" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 8h8v8H8z"/></svg>Tổng số đơn</h3>
-                <div class="value">{{ number_format($Orders) }}</div>
+                <div class="value" id="totalOrders">{{ number_format($Orders) }}</div>
             </div>
             <div class="card">
                 <h3><svg fill="#a03d07" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>Người dùng</h3>
                 <div class="value">{{ number_format($customers) }}</div>
             </div>
             <div class="card">
-                <h3><svg fill="#a03d07" viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/><circle cx="12" cy="12" r="10" stroke="#a03d07" stroke-width="2" fill="none"/></svg>Đang bán</h3>
-                <div class="value">{{ number_format($activeProducts) }}</div>
-            </div>
-            <div class="card">
-                <h3><svg fill="#dc3545" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#dc3545" stroke-width="2" fill="none"/><line x1="8" y1="8" x2="16" y2="16" stroke="#dc3545" stroke-width="2"/><line x1="16" y1="8" x2="8" y2="16" stroke="#dc3545" stroke-width="2"/></svg>Hết hàng</h3>
-                <div class="value">{{ number_format($outOfStockProducts) }}</div>
-            </div>
-            <div class="card">
                 <h3><svg fill="#f59e42" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#f59e42" stroke-width="2" fill="none"/><path d="M12 8v4l3 3" stroke="#f59e42" stroke-width="2" fill="none"/></svg>Đơn đang xử lý</h3>
-                <div class="value">{{ number_format($pendingOrders) }}</div>
+                <div class="value" id="pendingOrders">{{ number_format($pendingOrders) }}</div>
             </div>
             <div class="card">
                 <h3><svg fill="#dc3545" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4" stroke="#dc3545" stroke-width="2" fill="none"/><line x1="8" y1="8" x2="16" y2="16" stroke="#dc3545" stroke-width="2"/><line x1="16" y1="8" x2="8" y2="16" stroke="#dc3545" stroke-width="2"/></svg>Đơn bị huỷ</h3>
-                <div class="value">{{ number_format($cancelledOrders) }}</div>
+                <div class="value" id="cancelledOrders">{{ number_format($cancelledOrders) }}</div>
             </div>
             <div class="card" style="grid-column: span 2;">
-                <h3><svg fill="#a03d07" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 2.5-7.5L2 9h7z"/></svg>Top 4 sản phẩm bán chạy tháng này</h3>
-                <div class="value" style="font-size:16px;font-weight:500;color:#1f2937;">
+                <h3><svg fill="#a03d07" viewBox="0 0 24 24"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 2.5-7.5L2 9h7z"/></svg>Top 4 sản phẩm bán chạy</h3>
+                <div class="value" style="font-size:16px;font-weight:500;color:#1f2937;" id="bestSellers">
                     <ul>
                         @foreach($bestSellerNames as $item)
                             <li>
@@ -184,15 +169,57 @@
                     return;
                 }
                 
-                // Gọi API để lấy doanh thu theo khoảng thời gian
-                fetch(`/admin/statistics/revenue?start_date=${startDate}&end_date=${endDate}`)
+                // Hiển thị loading
+                getRevenueBtn.disabled = true;
+                getRevenueBtn.textContent = 'Đang tải...';
+                
+                // Gọi API để lấy tất cả thống kê theo khoảng thời gian
+                fetch(`/admin/statistics/date-range?start_date=${startDate}&end_date=${endDate}`)
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('dateRangeRevenue').textContent = formatMoney(data.revenue);
+                        if (data.success) {
+                            // Cập nhật doanh thu
+                            document.getElementById('dateRangeRevenue').textContent = formatMoney(data.revenue);
+                            
+                            // Cập nhật tổng số đơn
+                            document.getElementById('totalOrders').textContent = new Intl.NumberFormat('vi-VN').format(data.total_orders);
+                            
+                            // Cập nhật đơn đang xử lý
+                            document.getElementById('pendingOrders').textContent = new Intl.NumberFormat('vi-VN').format(data.pending_orders);
+                            
+                            // Cập nhật đơn bị hủy
+                            document.getElementById('cancelledOrders').textContent = new Intl.NumberFormat('vi-VN').format(data.cancelled_orders);
+                            
+                            // Cập nhật top sản phẩm bán chạy
+                            const bestSellersDiv = document.getElementById('bestSellers');
+                            if (bestSellersDiv && data.best_sellers) {
+                                let html = '<ul>';
+                                data.best_sellers.forEach(item => {
+                                    if (item.id) {
+                                        const slug = item.slug || item.name.toLowerCase().replace(/\s+/g, '-');
+                                        html += `<li>
+                                            <a href="/shop/${slug}/${item.id}" target="_blank" style="color:#d2601a;text-decoration:underline;">
+                                                ${item.name}
+                                            </a>
+                                            <span style="color:#9ca3af;">- ${item.total} sản phẩm</span>
+                                        </li>`;
+                                    } else {
+                                        html += `<li>${item.name}</li>`;
+                                    }
+                                });
+                                html += '</ul>';
+                                bestSellersDiv.innerHTML = html;
+                            }
+                        }
                     })
                     .catch(error => {
-                        console.error('Lỗi khi lấy dữ liệu doanh thu:', error);
-                        alert('Có lỗi xảy ra khi lấy dữ liệu doanh thu');
+                        console.error('Lỗi khi lấy dữ liệu thống kê:', error);
+                        alert('Có lỗi xảy ra khi lấy dữ liệu thống kê');
+                    })
+                    .finally(() => {
+                        // Khôi phục nút
+                        getRevenueBtn.disabled = false;
+                        getRevenueBtn.textContent = 'Xem doanh thu';
                     });
             });
             

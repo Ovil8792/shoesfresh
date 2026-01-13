@@ -32,9 +32,8 @@ class DeliveryController extends Controller
 
     public function show($id)
     {
-        //
-        $order = Order::with('orderItems')->findOrFail($id);
-        return view('admin.delivery.detail', compact('order'));
+        // Chuyển hướng đến trang chi tiết đơn hàng
+        return redirect()->route('order.show', $id);
     }
     public function accept($id)
     {
