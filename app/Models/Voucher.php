@@ -15,7 +15,9 @@ class Voucher extends Model
         'max_discount', 'min_order_value', 'usage_limit', 'used_count',
         'valid_from', 'valid_to'
     ];
-    public function role() {
-        return $this->belongsTo(Role::class);
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }
