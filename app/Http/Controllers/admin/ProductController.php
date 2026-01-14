@@ -252,11 +252,55 @@ class ProductController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage (soft delete - chuyển vào thùng rác).
      */
     public function destroy(string $id)
     {
         $product = Product::find($id);
+        if ($product) {
+            // Soft delete - chỉ đánh dấu xóa, không xóa file
+            $product->delete();
+            return redirect()->route('product.index')->with('success', 'Sản phẩm đã được chuyển vào thùng rác');
+        }
+        return redirect()->route('product.index')->with('error', 'Sản phẩm không tồn tại');
+    }
+
+    /**
+     * Hiển thị danh sách sản phẩm trong thùng rác
+     */
+    public function trash(Request $request)
+    {
+        $categories = Category::all();
+        $query = Product::onlyTrashed()->with('images', 'category');
+
+        if ($request->filled('keyword')) {
+            $query->where('name', 'like', '%' . $request->keyword . '%');
+        }
+
+        $products = $query->orderBy('deleted_at', 'desc')->paginate(10);
+
+        return view('admin.product.trash', compact('products', 'categories'));
+    }
+
+    /**
+     * Khôi phục sản phẩm từ thùng rác
+     */
+    public function restore(string $id)
+    {
+        $product = Product::onlyTrashed()->find($id);
+        if ($product) {
+            $product->restore();
+            return redirect()->route('product.trash')->with('success', 'Khôi phục sản phẩm thành công');
+        }
+        return redirect()->route('product.trash')->with('error', 'Sản phẩm không tồn tại');
+    }
+
+    /**
+     * Xóa vĩnh viễn sản phẩm
+     */
+    public function forceDelete(string $id)
+    {
+        $product = Product::onlyTrashed()->find($id);
         if ($product) {
             // Xóa ảnh đại diện
             if ($product->thumbnail && file_exists(public_path($product->thumbnail))) {
@@ -264,17 +308,17 @@ class ProductController extends Controller
             }
             // Xóa ảnh phụ
             foreach ($product->images as $img) {
-                if ($img->image && file_exists(public_path($img->image))) {
-                    unlink(public_path($img->image));
+                if ($img->url && file_exists(public_path($img->url))) {
+                    unlink(public_path($img->url));
                 }
-                $img->delete();
+                $img->forceDelete();
             }
             // Xóa biến thể
-            ProductVariant::where('product_id', $product->id)->delete();
-            // Xóa sản phẩm
-            $product->delete();
-            return redirect()->route('product.index')->with('success', 'Xóa sản phẩm thành công');
+            ProductVariant::where('product_id', $product->id)->forceDelete();
+            // Xóa vĩnh viễn sản phẩm
+            $product->forceDelete();
+            return redirect()->route('product.trash')->with('success', 'Xóa vĩnh viễn sản phẩm thành công');
         }
-        return redirect()->route('product.index')->with('error', 'Sản phẩm không tồn tại');
+        return redirect()->route('product.trash')->with('error', 'Sản phẩm không tồn tại');
     }
 }

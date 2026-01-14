@@ -54,11 +54,20 @@ class ShopController extends Controller
         }
         if ($request->filled('sort')) {
             switch ($request->sort) {
-                case '1': $query->orderBy('price', 'asc'); break;
-                case '2': $query->orderBy('price', 'desc'); break;
-                case '3': $query->orderBy('created_at', 'desc'); break;
-                default: $query->orderBy('id', 'asc');
+                case 'price_asc': 
+                    $query->orderBy('price', 'asc'); 
+                    break;
+                case 'price_desc': 
+                    $query->orderBy('price', 'desc'); 
+                    break;
+                case 'latest': 
+                    $query->orderBy('created_at', 'desc'); 
+                    break;
+                default: 
+                    $query->orderBy('id', 'asc');
             }
+        } else {
+            $query->orderBy('id', 'asc');
         }
 
         $products = $query->paginate(12)->withQueryString();

@@ -48,6 +48,69 @@
     </div>
 </section>
 
+{{-- ===================== VOUCHER ===================== --}}
+@if($vouchers->count() > 0)
+<section class="vouchers py-5" style="background-color: #f8f9fa;">
+    <div class="container">
+        <h2 class="section-title text-center mb-4">Mã giảm giá</h2>
+        <div class="row g-4">
+            @foreach ($vouchers as $voucher)
+                <div class="col-lg-4 col-md-6 col-sm-12">
+                    <div class="voucher-card shadow-sm rounded p-4 bg-white position-relative" style="border-left: 4px solid #FF6B35;">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div class="flex-grow-1">
+                                <h5 class="text-primary fw-bold mb-2">{{ $voucher->code }}</h5>
+                                @if($voucher->description)
+                                    <p class="text-muted small mb-2">{{ $voucher->description }}</p>
+                                @endif
+                            </div>
+                            <div class="text-end">
+                                @if($voucher->discount_type == 'percent')
+                                    <span class="badge bg-danger fs-6 px-3 py-2">
+                                        -{{ number_format($voucher->discount_value, 0, ',', '.') }}%
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger fs-6 px-3 py-2">
+                                        -{{ number_format($voucher->discount_value, 0, ',', '.') }} đ
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <div class="voucher-info">
+                            @if($voucher->min_order_value > 0)
+                                <p class="small text-muted mb-1">
+                                    <i class="fa fa-shopping-cart me-1"></i>
+                                    Áp dụng cho đơn hàng từ {{ number_format($voucher->min_order_value, 0, ',', '.') }} đ
+                                </p>
+                            @endif
+                            @if($voucher->max_discount)
+                                <p class="small text-muted mb-1">
+                                    <i class="fa fa-gift me-1"></i>
+                                    Giảm tối đa {{ number_format($voucher->max_discount, 0, ',', '.') }} đ
+                                </p>
+                            @endif
+                            <p class="small text-muted mb-0">
+                                <i class="fa fa-calendar me-1"></i>
+                                HSD: {{ \Carbon\Carbon::parse($voucher->valid_to)->format('d/m/Y') }}
+                            </p>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-primary w-100 copy-voucher-btn" 
+                                    data-code="{{ $voucher->code }}"
+                                    onclick="copyVoucherCode('{{ $voucher->code }}', this)">
+                                <i class="fa fa-copy me-1"></i> Sao chép mã
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+@endif
+
 {{-- ===================== COMPONENT LIST SẢN PHẨM ===================== --}}
 @php
     $sections = [
@@ -104,4 +167,32 @@
         box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     }
     
+    .voucher-card {
+        transition: 0.3s;
+        height: 100%;
+    }
+    .voucher-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+    }
+    
 </style>
+
+<script>
+    function copyVoucherCode(code, button) {
+        navigator.clipboard.writeText(code).then(function() {
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fa fa-check me-1"></i> Đã sao chép!';
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-success');
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.classList.remove('btn-success');
+                button.classList.add('btn-outline-primary');
+            }, 2000);
+        }).catch(function(err) {
+            alert('Không thể sao chép mã. Vui lòng thử lại.');
+        });
+    }
+</script>

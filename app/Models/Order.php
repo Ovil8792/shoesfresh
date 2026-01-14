@@ -13,18 +13,24 @@ class Order extends Model
 
     // ===== Trạng thái (đổi giá trị nếu DB bạn đang dùng khác) =====
     public const STATUS_PROCESSING = 'processing';   // = Đang xử lý
-    public const STATUS_PENDING    = 'pending';
-    public const STATUS_PAID       = 'paid';         // = Đã thanh toán
-    public const STATUS_DELIVERING = 'delivering';
-    public const STATUS_SHIPPING   = 'shipping';     // = Đang giao
+    public const STATUS_CONFIRMED  = 'confirmed';    // = Đã xác nhận
+    public const STATUS_DELIVERING = 'delivering';   // = Đang giao
     public const STATUS_COMPLETED  = 'completed';    // = Hoàn tất
     public const STATUS_CANCELLED  = 'cancelled';    // = Đã hủy
 
+    // Thứ tự các trạng thái (dùng để kiểm tra chuyển đổi hợp lệ)
+    private const STATUS_ORDER = [
+        self::STATUS_PROCESSING => 1,
+        self::STATUS_CONFIRMED  => 2,
+        self::STATUS_DELIVERING => 3,
+        self::STATUS_COMPLETED  => 4,
+        self::STATUS_CANCELLED  => 5,  // Once cancelled, cannot be changed back
+    ];
+
     public const STATUS_LABELS = [
         self::STATUS_PROCESSING => 'Đang xử lý',
-        self::STATUS_PENDING    => 'Pending',
-        self::STATUS_PAID       => 'Đã thanh toán',
-        self::STATUS_SHIPPING   => 'Đang giao',
+        self::STATUS_CONFIRMED  => 'Đã xác nhận',
+        self::STATUS_DELIVERING => 'Đang giao',
         self::STATUS_COMPLETED  => 'Hoàn tất',
         self::STATUS_CANCELLED  => 'Đã hủy',
     ];

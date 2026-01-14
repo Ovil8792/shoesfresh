@@ -37,17 +37,17 @@
 
                     <div class="mb-3">
                         <label class="form-label">Giảm tối đa</label>
-                        <input type="number" class="form-control" name="max_discount" value="{{ $voucher->max_discount }}" min="0">
+                        <input type="number" class="form-control" name="max_discount" value="{{ $voucher->max_discount }}" required min="0">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Giá trị đơn tối thiểu</label>
-                        <input type="number" class="form-control" name="min_order_value" value="{{ $voucher->min_order_value }}" min="0">
+                        <input type="number" class="form-control" name="min_order_value" value="{{ $voucher->min_order_value }}" required min="0">
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Số lượt sử dụng tối đa</label>
-                        <input type="number" class="form-control" name="usage_limit" value="{{ $voucher->usage_limit }}" min="1">
+                        <input type="number" class="form-control" name="usage_limit" value="{{ $voucher->usage_limit }}" required min="1">
                     </div>
 
                     <div class="mb-3">

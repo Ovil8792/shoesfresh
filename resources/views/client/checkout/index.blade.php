@@ -30,21 +30,21 @@
                                 <div class="col-lg-12">
                                     <div class="checkout__input">
                                         <p>Họ tên<span>*</span></p>
-                                        <input type="text" name="name" value="{{ old('name') }}" required>
+                                        <input type="text" name="name" value="{{ old('name', $user->name ?? '') }}" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="checkout__input">
                                 <p>Địa chỉ giao hàng<span>*</span></p>
-                                <input type="text" name="address" value="{{ old('address') }}" required placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành">
+                                <input type="text" name="address" value="{{ old('address', $user->address ?? '') }}" required placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/thành">
                             </div>
                             <div class="checkout__input">
                                 <p>Số điện thoại<span>*</span></p>
-                                <input type="text" name="phone" value="{{ old('phone') }}" required>
+                                <input type="text" name="phone" value="{{ old('phone', $user->phone ?? '') }}" required>
                             </div>
                             <div class="checkout__input">
                                 <p>Email<span>*</span></p>
-                                <input type="email" name="email" value="{{ old('email') }}" required>
+                                <input type="email" name="email" value="{{ old('email', $user->email ?? '') }}" required>
                             </div>
                             <div class="checkout__input">
                                 <p>Ghi chú đơn hàng</p>

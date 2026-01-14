@@ -40,14 +40,30 @@
                     @php
                         if ($order->payment_method === 'COD') {
                             $paymentLabel = 'Thanh toán khi nhận hàng';
-                            $showStatus = false;
+                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
+                            if ($order->status === 'completed') {
+                                $paymentStatus = 'Đã thanh toán';
+                                $showStatus = true;
+                            } else {
+                                $showStatus = false;
+                            }
                         } elseif ($order->payment_method === 'VNPAY') {
                             $paymentLabel = 'VNPAY';
-                            $paymentStatus = $order->status === 'pending' ? 'Chưa thanh toán' : 'Đã thanh toán';
+                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
+                            if ($order->status === 'completed') {
+                                $paymentStatus = 'Đã thanh toán';
+                            } else {
+                                $paymentStatus = $order->status === 'pending' ? 'Chưa thanh toán' : 'Đã thanh toán';
+                            }
                             $showStatus = true;
                         } else {
                             $paymentLabel = $order->payment_method;
-                            $paymentStatus = 'Không xác định';
+                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
+                            if ($order->status === 'completed') {
+                                $paymentStatus = 'Đã thanh toán';
+                            } else {
+                                $paymentStatus = 'Không xác định';
+                            }
                             $showStatus = true;
                         }
                     @endphp

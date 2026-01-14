@@ -258,6 +258,48 @@ body.admin-shell {
     border: 1px solid rgba(255, 143, 63, 0.12);
     backdrop-filter: none;
     box-shadow: 0 25px 35px rgba(255, 143, 63, 0.08);
+    color: #1f1f1f;
+}
+
+.admin-main label,
+.admin-main .form-label,
+.admin-main .form-text,
+.admin-main .form-check-label {
+    color: #1f1f1f;
+}
+
+.admin-main .form-control,
+.admin-main .form-select {
+    color: #1f1f1f;
+}
+
+.admin-main .form-control::placeholder,
+.admin-main .form-select::placeholder {
+    color: #1f1f1f;
+    opacity: 0.9;
+}
+
+/* Force dark text inside Bootstrap modals in admin area */
+body.admin-shell .modal-content {
+    color: #1f1f1f;
+}
+
+body.admin-shell .modal-body label,
+body.admin-shell .modal-body .form-label,
+body.admin-shell .modal-body .form-text,
+body.admin-shell .modal-body .form-check-label {
+    color: #1f1f1f;
+}
+
+body.admin-shell .modal-body .form-control,
+body.admin-shell .modal-body .form-select {
+    color: #1f1f1f;
+}
+
+body.admin-shell .modal-body .form-control::placeholder,
+body.admin-shell .modal-body .form-select::placeholder {
+    color: #1f1f1f;
+    opacity: 0.9;
 }
 
 .admin-main.is-loading {

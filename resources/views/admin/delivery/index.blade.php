@@ -53,7 +53,7 @@
                                     <td>{{ $order->shipping_address }}</td>
                                     <td>{{ $order->created_at->format('d/m/Y H:i') }}</td>
                                     <td class="text-center">
-                                        <a href="{{ route('delivery.show', $order->id) }}" class="btn btn-sm btn-primary">
+                                        <a href="{{ route('order.show', $order->id) }}" class="btn btn-sm btn-primary">
                                             <i class="bi bi-eye"></i> Xem chi tiết
                                         </a>
                                         <form action="{{ route('delivery.accept', $order->id) }}" method="POST" class="d-inline">
