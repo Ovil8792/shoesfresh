@@ -21,24 +21,21 @@
     @endif
 
     <div class="page-heading">
-        <h3>Danh sách sản phẩm</h3>
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Thùng rác sản phẩm</h3>
+            <a href="{{ route('product.index') }}" class="btn btn-outline-primary">
+                <i class="fa fa-arrow-left me-1"></i>Quay lại
+            </a>
+        </div>
     </div>
-    <!-- Bảng Danh sách sản phẩm -->
+    <!-- Bảng Danh sách sản phẩm trong thùng rác -->
     <section class="section">
         <div class="row" id="table-head">
             <div class="col-12">
                 <div class="card-content">
-                    {{-- Nút thêm --}}
+                    {{-- Tìm kiếm --}}
                     <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                        <div class="d-flex gap-2 mb-2 mb-md-0">
-                            <a href="{{ route('product.create') }}" class="btn btn-primary" data-bs-toggle="modal">
-                                + Thêm sản phẩm
-                            </a>
-                            <a href="{{ route('product.trash') }}" class="btn btn-outline-secondary">
-                                <i class="fa fa-trash me-1"></i>Thùng rác
-                            </a>
-                        </div>
-                        <form action="{{ route('product.index') }}" method="GET" class="d-flex w-auto"
+                        <form action="{{ route('product.trash') }}" method="GET" class="d-flex w-auto"
                             style="max-width: 200px;">
                             <input type="text" name="keyword" class="form-control form-control-sm me-2"
                                 placeholder="Tìm theo tên..." value="{{ request('keyword') }}">
@@ -47,7 +44,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        {{-- Bảng danh mục --}}
+                        {{-- Bảng danh sách --}}
                         <table class="table table-striped table-bordered align-middle">
                             <thead class="table-white">
                                 <tr>
@@ -56,13 +53,12 @@
                                     <th>Tên</th>
                                     <th>Giá</th>
                                     <th>Hình ảnh</th>
-                                    <th>Trạng thái</th>
-                                    <th>Ngày tạo</th>
+                                    <th>Ngày xóa</th>
                                     <th class="text-center">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($products as $product)
+                                @forelse ($products as $product)
                                     <tr>
                                         <td>{{ $product->id }}</td>
                                         <td>{{ $product->category ? $product->category->name : '' }}</td>
@@ -76,26 +72,32 @@
                                                 Không có ảnh
                                             @endif
                                         </td>
-                                        <td>
-                                            @if ($product->status == 1)
-                                                <span class="badge bg-success">Hiển thị</span>
-                                            @else
-                                                <span class="badge bg-secondary">Ẩn</span>
-                                            @endif
-                                        </td>
-                                        <td>{{ $product->created_at->format('d/m/Y') }}</td>
+                                        <td>{{ $product->deleted_at ? $product->deleted_at->format('d/m/Y H:i') : '' }}</td>
                                         <td class="text-center">
                                             <div class="d-flex flex-wrap gap-1 justify-content-center">
-                                                <a href="{{ route('product.image.index', $product->id) }}" class="btn btn-sm btn-secondary">Ảnh</a>
-                                                <a href="{{ route('product.show', $product->id) }}" class="btn btn-sm btn-info">Xem</a>
-                                                <a href="{{ route('product.edit', $product->id) }}" class="btn btn-sm btn-warning">Sửa</a>
-                                                <a href="{{ route('product.delete', $product->id) }}" 
-                                                   onclick="return confirm('Bạn có chắc muốn xoá không?')" 
-                                                   class="btn btn-sm btn-danger">Xóa</a>
+                                                <a href="{{ route('product.restore', $product->id) }}" 
+                                                   onclick="return confirm('Bạn có chắc muốn khôi phục sản phẩm này?')" 
+                                                   class="btn btn-sm btn-success">
+                                                    <i class="fa fa-undo me-1"></i>Khôi phục
+                                                </a>
+                                                <a href="{{ route('product.forceDelete', $product->id) }}" 
+                                                   onclick="return confirm('Bạn có chắc muốn xóa vĩnh viễn sản phẩm này? Hành động này không thể hoàn tác!')" 
+                                                   class="btn btn-sm btn-danger">
+                                                    <i class="fa fa-trash me-1"></i>Xóa vĩnh viễn
+                                                </a>
                                             </div>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="7" class="text-center">
+                                            <div class="py-4">
+                                                <i class="fa fa-trash" style="font-size: 48px; color: #ccc;"></i>
+                                                <p class="mt-2 text-muted">Thùng rác trống</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>
@@ -108,7 +110,5 @@
                 </div>
             </div>
         </div>
-        </div>
     </section>
-    {{-- End Danh mục sản phẩm --}}
 @endsection

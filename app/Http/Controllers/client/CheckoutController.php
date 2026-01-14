@@ -9,6 +9,7 @@ use App\Models\CartItem;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Delivery;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -26,6 +27,10 @@ class CheckoutController extends Controller
         if (!$userId) {
             return redirect()->route('user.login')->with('error', 'Vui lòng đăng nhập trước khi đặt hàng!');
         }
+        
+        // Lấy thông tin đầy đủ của user từ database
+        $user = User::find($userId);
+        
         $cart = Cart::where('user_id', $userId)->first();
         $cartItems = $cart
             ? CartItem::with(['variant.product', 'variant.size', 'variant.color'])
@@ -56,7 +61,8 @@ class CheckoutController extends Controller
             'cartTotal',
             'voucherCode',
             'voucherDiscount',
-            'cartFinalTotal'
+            'cartFinalTotal',
+            'user'
         ));
     }
 

@@ -7,6 +7,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
         <div class="row justify-content-center mt-3">
             <div class="col-md-12">
                 <div class="card shadow-lg" style="border-radius: 16px;">
@@ -35,21 +41,25 @@
                             <tr>
                                 <td><b>Trạng thái:</b></td>
                                 <td>
-                                    <form action="{{ route('order.updateStatus', $order->id) }}" method="POST" class="d-inline-block">
+                                    <form id="statusForm" action="{{ route('order.updateStatus', $order->id) }}" method="POST" class="d-inline-block">
                                         @csrf
                                         @method('PUT')
+                                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
 
                                         <select name="status"
                                                 class="form-select form-select-sm order-status-dropdown"
                                                 style="min-width:160px; display:inline-block;"
-                                                {{ $order->status == 'completed' ? 'disabled' : '' }}>
-                                            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Đang xử lý</option>
-                                            <option value="delivering" {{ $order->status == 'delivering' ? 'selected' : '' }}>Đang giao</option>
-                                            <option value="completed"  {{ $order->status == 'completed'  ? 'selected' : '' }}>Hoàn tất</option>
+                                                {{ $order->status == 'completed' || $order->status == 'cancelled' ? 'disabled' : '' }}>
+                                            <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }} 
+                                                {{ $order->status == 'delivering' || $order->status == 'confirmed' ? 'disabled' : '' }}>Đang xử lý</option>
+                                            <option value="confirmed"  {{ $order->status == 'confirmed'  ? 'selected' : '' }}
+                                                {{ $order->status == 'delivering' ? 'disabled' : '' }}>Đã xác nhận</option>
+                                            <option value="delivering" {{ $order->status == 'delivering' ? 'selected' : '' }}
+                                                {{ $order->status == 'delivering' ? 'disabled' : '' }}>Đang giao</option>
+                                            <option value="completed"  {{ $order->status == 'completed'  ? 'selected' : '' }}
+                                                {{ $order->status != 'delivering' ? 'disabled' : '' }}>Hoàn tất</option>
                                             <option value="cancelled"  {{ $order->status == 'cancelled'  ? 'selected' : '' }}>Đã hủy</option>
-                                            <option value="paid"       {{ $order->status == 'paid'       ? 'selected' : '' }}>Đã thanh toán</option>
                                         </select>
-
 
                                         {{-- input ẩn để nhét lý do hủy trước khi submit --}}
                                         <input type="hidden" name="cancel_reason" class="cancel-reason-input" value="">
@@ -72,15 +82,27 @@
                                     @php
                                         $pm = strtoupper((string) $order->payment_method);
                                         $st = (string) $order->status;
-                                        // VNPay và đơn không pending/cancelled ⇒ coi như đã thanh toán (hiển thị)
-                                        $isPaidByDisplay = ($pm === 'VNPAY') && !in_array($st, ['pending','cancelled','Đã huỷ'], true);
+                                        
+                                        // Logic: VNPAY → Đã thanh toán (trừ khi cancelled)
+                                        // COD → Chưa thanh toán (nếu chưa completed), Đã thanh toán (nếu completed)
+                                        if ($pm === 'VNPAY' && $st !== 'cancelled') {
+                                            $paymentStatus = 'Đã thanh toán';
+                                            $paymentClass = 'success';
+                                        } elseif ($pm === 'COD') {
+                                            if ($st === 'completed') {
+                                                $paymentStatus = 'Đã thanh toán';
+                                                $paymentClass = 'success';
+                                            } else {
+                                                $paymentStatus = 'Chưa thanh toán';
+                                                $paymentClass = 'warning';
+                                            }
+                                        } else {
+                                            $paymentStatus = ucfirst($order->payment_method);
+                                            $paymentClass = 'secondary';
+                                        }
                                     @endphp
 
-                                    @if($isPaidByDisplay)
-                                        <span class="badge bg-success">Đã thanh toán</span>
-                                    @else
-                                        {{ ucfirst($order->payment_method) }}
-                                    @endif
+                                    <span class="badge bg-{{ $paymentClass }}">{{ $paymentStatus }}</span>
                                 </td>
                             </tr>
 
@@ -161,39 +183,57 @@
         const dropdown = document.querySelector('.order-status-dropdown');
         if (!dropdown) return;
 
-        let prevStatus = dropdown.value;
-        let currentForm = dropdown.closest('form');
+        const statusForm = document.getElementById('statusForm');
+        const cancelForm = document.getElementById('cancelReasonForm');
+        const cancelReasonInput = document.getElementById('cancelReasonInput');
+        const cancelReasonHidden = document.querySelector('.cancel-reason-input');
+        
+        // Lưu trạng thái ban đầu
+        let previousStatus = dropdown.value;
 
-        dropdown.addEventListener('focus', function(){ prevStatus = this.value; });
-
-        dropdown.addEventListener('change', function () {
+        // Xử lý khi thay đổi trạng thái
+        dropdown.addEventListener('change', function() {
             if (this.value === 'cancelled') {
-                // Mở modal để nhập lý do
-                const modalEl = document.getElementById('cancelReasonModal');
-                const bsModal = new bootstrap.Modal(modalEl);
-                bsModal.show();
-
-                // Nếu đóng modal mà không submit -> revert về trạng thái cũ
-                modalEl.addEventListener('hidden.bs.modal', function () {
-                    const reasonHidden = currentForm.querySelector('.cancel-reason-input');
-                    if (!reasonHidden.value) dropdown.value = prevStatus;
+                // Nếu chọn hủy đơn, hiển thị modal nhập lý do
+                const modal = new bootstrap.Modal(document.getElementById('cancelReasonModal'));
+                modal.show();
+                
+                // Nếu đóng modal mà không nhập lý do, trở về trạng thái trước đó
+                document.getElementById('cancelReasonModal').addEventListener('hidden.bs.modal', function () {
+                    if (!cancelReasonHidden.value) {
+                        dropdown.value = previousStatus;
+                    }
                 }, { once: true });
             } else {
-                // Trạng thái khác hủy -> submit luôn
-                currentForm.submit();
+                // Nếu chọn trạng thái khác, submit form ngay
+                statusForm.submit();
             }
         });
 
-        // Submit modal: nhét lý do vào hidden input rồi submit form
-        document.getElementById('cancelReasonForm').addEventListener('submit', function (e) {
-            e.preventDefault();
-            const reason = document.getElementById('cancelReasonInput').value.trim();
-            if (!reason) return;
-
-            currentForm.querySelector('.cancel-reason-input').value = reason;
-            bootstrap.Modal.getInstance(document.getElementById('cancelReasonModal')).hide();
-            currentForm.submit();
-        });
+        // Xử lý khi submit form lý do hủy đơn
+        if (cancelForm) {
+            cancelForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const reason = cancelReasonInput.value.trim();
+                
+                if (!reason) {
+                    alert('Vui lòng nhập lý do hủy đơn');
+                    return false;
+                }
+                
+                // Lưu lý do vào input ẩn
+                cancelReasonHidden.value = reason;
+                
+                // Đóng modal và submit form
+                const modal = bootstrap.Modal.getInstance(document.getElementById('cancelReasonModal'));
+                modal.hide();
+                
+                // Submit form sau khi đóng modal
+                setTimeout(() => {
+                    statusForm.submit();
+                }, 300);
+            });
+        }
     });
 </script>
 

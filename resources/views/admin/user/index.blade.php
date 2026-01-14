@@ -9,7 +9,16 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     @endif
-    {{-- end Thông báo thành công --}}
+    {{-- Thông báo lỗi --}}
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show text-center"
+            style="position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 300px;"
+            role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
+        </div>
+    @endif
+    {{-- end Thông báo --}}
 
     <div class="page-heading">
         <h3>Danh sách tài khoản người dùng</h3>
@@ -94,11 +103,13 @@
                                                     class="btn btn-sm btn-warning">
                                                     Sửa
                                                 </a>
-                                                <a href="{{ route('user.delete', $user->id) }}"
-                                                    onclick="return confirm('Bạn có chắc muốn xoá không?')"
-                                                    class="btn btn-sm btn-danger">
-                                                    Xóa
-                                                </a>
+                                                @if($user->role_id != 1)
+                                                    <a href="{{ route('user.delete', $user->id) }}"
+                                                        onclick="return confirm('Bạn có chắc muốn xoá không?')"
+                                                        class="btn btn-sm btn-danger">
+                                                        Xóa
+                                                    </a>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

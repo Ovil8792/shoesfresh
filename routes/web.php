@@ -67,6 +67,9 @@ Route::prefix('admin')->group(function () {
             Route::get('edit/{id}', [ProductController::class, 'edit'])->name('product.edit');
             Route::post('update/{id}', [ProductController::class, 'update'])->name('product.update');
             Route::get('delete/{id}', [ProductController::class, 'destroy'])->name('product.delete');
+            Route::get('trash', [ProductController::class, 'trash'])->name('product.trash');
+            Route::get('restore/{id}', [ProductController::class, 'restore'])->name('product.restore');
+            Route::get('force-delete/{id}', [ProductController::class, 'forceDelete'])->name('product.forceDelete');
 
             // Kho ảnh
             Route::prefix('image')->group(function () {
@@ -271,6 +274,7 @@ Route::post('/profile/orders/{id}/cancel', [OrderHistoryController::class, 'canc
 // Route cho thống kê
 Route::get('/admin/stastic', [StasticController::class, 'index']);
 Route::get('/admin/statistics/revenue', [StasticController::class, 'getDateRangeRevenue'])->name('admin.statistics.revenue');
+Route::get('/admin/statistics/date-range', [StasticController::class, 'getDateRangeStatistics'])->name('admin.statistics.date-range');
 
 // Bán hàng tại quầy
 Route::prefix('pos')->group(function () {

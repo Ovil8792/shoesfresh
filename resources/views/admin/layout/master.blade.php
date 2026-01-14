@@ -112,6 +112,12 @@
                                     <span>Sản phẩm</span>
                                 </a>
                                     </li>
+                            <li class="nav-item {{ $isActive(['admin/product/trash']) ? 'active' : '' }}">
+                                <a href="{{ route('product.trash') }}" data-spa-link>
+                                    <span class="nav-icon"><i class="bi bi-trash"></i></span>
+                                    <span>Thùng rác</span>
+                                </a>
+                            </li>
                             <li class="nav-item {{ $isActive(['admin/brand*']) ? 'active' : '' }}">
                                 <a href="{{ url('admin/brand') }}" data-spa-link>
                                     <span class="nav-icon">
