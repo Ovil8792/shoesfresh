@@ -11,58 +11,81 @@
                             
                             {{-- Danh mục --}}
                             <div class="sidebar__item mb-4 pb-3 border-bottom">
-    <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">Danh mục giày</h4>
-    <div class="sidebar-list">
-        @foreach ($categories as $category)
-            <div class="form-check mb-2">
-                <input type="radio" name="category" value="{{ $category->id }}"
-                    id="category-{{ $category->id }}"
-                    {{ request('category') == $category->id ? 'checked' : '' }} 
-                    class="form-check-input filter-radio-input">
-                <label class="form-check-label filter-option-label" for="category-{{ $category->id }}">
-                    {{ $category->name }}
-                </label>
-            </div>
-        @endforeach
-    </div>
-</div>
+                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">
+                                    <i class="fa fa-list me-2"></i>Danh mục giày
+                                </h4>
+                                <div class="sidebar-list">
+                                    <div class="form-check mb-2">
+                                        <input type="radio" name="category" value="" id="category-all"
+                                            {{ !request('category') ? 'checked' : '' }} 
+                                            class="form-check-input filter-radio-input">
+                                        <label class="form-check-label filter-option-label" for="category-all">
+                                            Tất cả danh mục
+                                        </label>
+                                    </div>
+                                    @foreach ($categories as $category)
+                                        <div class="form-check mb-2">
+                                            <input type="radio" name="category" value="{{ $category->id }}"
+                                                id="category-{{ $category->id }}"
+                                                {{ (string)request('category') === (string)$category->id ? 'checked' : '' }} 
+                                                class="form-check-input filter-radio-input">
+                                            <label class="form-check-label filter-option-label" for="category-{{ $category->id }}">
+                                                {{ $category->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                             
                             {{-- Thương hiệu --}}
-                            {{-- Thương hiệu --}}
-<div class="sidebar__item mb-4 pb-3 border-bottom">
-    <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">Thương hiệu</h4>
-    <div class="sidebar-list">
-        @foreach ($brands as $brand)
-            <div class="form-check mb-2">
-                <input type="radio" name="brand" value="{{ $brand->id }}"
-                    id="brand-{{ $brand->id }}"
-                    {{ request('brand') == $brand->id ? 'checked' : '' }} 
-                    class="form-check-input filter-radio-input">
-                <label class="form-check-label filter-option-label" for="brand-{{ $brand->id }}">
-                    {{ $brand->name }}
-                </label>
-            </div>
-        @endforeach
-        <div class="form-check mb-2">
-            <input type="radio" name="brand" value="" id="brand-all"
-                {{ request('brand') ? '' : 'checked' }} 
-                class="form-check-input filter-radio-input">
-            <label class="form-check-label filter-option-label" for="brand-all">
-                Tất cả
-            </label>
-        </div>
-    </div>
-</div>
+                            <div class="sidebar__item mb-4 pb-3 border-bottom">
+                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">
+                                    <i class="fa fa-tag me-2"></i>Thương hiệu
+                                </h4>
+                                <div class="sidebar-list">
+                                    <div class="form-check mb-2">
+                                        <input type="radio" name="brand" value="" id="brand-all"
+                                            {{ !request('brand') ? 'checked' : '' }} 
+                                            class="form-check-input filter-radio-input">
+                                        <label class="form-check-label filter-option-label" for="brand-all">
+                                            Tất cả thương hiệu
+                                        </label>
+                                    </div>
+                                    @foreach ($brands as $brand)
+                                        <div class="form-check mb-2">
+                                            <input type="radio" name="brand" value="{{ $brand->id }}"
+                                                id="brand-{{ $brand->id }}"
+                                                {{ (string)request('brand') === (string)$brand->id ? 'checked' : '' }} 
+                                                class="form-check-input filter-radio-input">
+                                            <label class="form-check-label filter-option-label" for="brand-{{ $brand->id }}">
+                                                {{ $brand->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                             
                             {{-- Khoảng giá --}}
                             <div class="sidebar__item mb-4 pb-3 border-bottom">
-                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">Khoảng giá</h4>
+                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">
+                                    <i class="fa fa-money me-2"></i>Khoảng giá
+                                </h4>
                                 <div class="price-range-buttons d-grid" style="gap: 8px;">
-                                    <button type="button" class="btn price-range-btn text-start" data-min="0" data-max="200000">Dưới 200K</button>
-                                    <button type="button" class="btn price-range-btn text-start" data-min="200000" data-max="500000">200K - 500K</button>
-                                    <button type="button" class="btn price-range-btn text-start" data-min="500000" data-max="1000000">500K - 1.000K</button>
-                                    <button type="button" class="btn price-range-btn text-start" data-min="1000000" data-max="3000000">1.000K - 3.000K</button>
-                                    <button type="button" class="btn price-range-btn text-start" data-min="3000000" data-max="99999999">Trên 3.000K</button>
+                                    <button type="button" class="btn price-range-btn text-start border rounded p-2" data-min="0" data-max="200000">
+                                        <i class="fa fa-tag me-2"></i>Dưới 200K
+                                    </button>
+                                    <button type="button" class="btn price-range-btn text-start border rounded p-2" data-min="200000" data-max="500000">
+                                        <i class="fa fa-tag me-2"></i>200K - 500K
+                                    </button>
+                                    <button type="button" class="btn price-range-btn text-start border rounded p-2" data-min="500000" data-max="1000000">
+                                        <i class="fa fa-tag me-2"></i>500K - 1.000K
+                                    </button>
+                                    <button type="button" class="btn price-range-btn text-start border rounded p-2" data-min="1000000" data-max="3000000">
+                                        <i class="fa fa-tag me-2"></i>1.000K - 3.000K
+                                    </button>
+                                    <button type="button" class="btn price-range-btn text-start border rounded p-2" data-min="3000000" data-max="99999999">
+                                        <i class="fa fa-tag me-2"></i>Trên 3.000K
+                                    </button>
                                 </div>
                                 <input type="hidden" id="minRange" name="min_price" value="{{ request('min_price', 0) }}">
                                 <input type="hidden" id="maxRange" name="max_price" value="{{ request('max_price', 99999999) }}">
@@ -70,41 +93,51 @@
                             
                             {{-- Màu sắc --}}
                             <div class="sidebar__item sidebar__item__color--option mb-4 pb-3 border-bottom">
-                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">Màu sắc</h4>
-                                <div class="sidebar__item__color d-flex flex-wrap" style="gap: 10px;">
+                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">
+                                    <i class="fa fa-palette me-2"></i>Màu sắc
+                                </h4>
+                                <div class="sidebar__item__color d-flex flex-wrap align-items-center" style="gap: 10px;">
                                     @foreach ($colors as $color)
                                         <label for="color-{{ $color->id }}"
-                                            class="color-label d-flex align-items-center justify-content-center {{ request('color') == $color->id ? 'active' : '' }}"
-                                            style="background-color: {{ $color->hex_code }};" title="{{ $color->name }}">
+                                            class="color-label d-flex align-items-center justify-content-center {{ (string)request('color') === (string)$color->id ? 'active' : '' }}"
+                                            style="width: 45px; height: 45px; background-color: {{ $color->hex_code }}; border: 2px solid {{ (string)request('color') === (string)$color->id ? '#007bff' : '#ddd' }}; border-radius: 8px; cursor: pointer; transition: all 0.3s; box-shadow: {{ (string)request('color') === (string)$color->id ? '0 0 0 3px rgba(0,123,255,0.25)' : 'none' }};"
+                                            title="{{ $color->name }}">
                                             <input type="radio" name="color" value="{{ $color->id }}"
                                                 id="color-{{ $color->id }}"
                                                 style="opacity:0;position:absolute;inset:0;margin:0;"
-                                                {{ request('color') == $color->id ? 'checked' : '' }}>
-                                            {{-- Dấu check (nếu cần) --}}
-                                            @if (request('color') == $color->id)
-                                                <i class="fa fa-check text-white" style="text-shadow: 0 0 3px rgba(0,0,0,0.5);"></i>
+                                                {{ (string)request('color') === (string)$color->id ? 'checked' : '' }}>
+                                            @if ((string)request('color') === (string)$color->id)
+                                                <i class="fa fa-check text-white" style="text-shadow: 0 0 3px rgba(0,0,0,0.8); font-size: 16px;"></i>
                                             @endif
                                         </label>
                                     @endforeach
-                                    {{-- Nút xóa màu --}}
                                     @if (request('color'))
-                                        <a href="{{ route('shop.index', array_merge(request()->except('color', 'page'))) }}" class="btn btn-sm btn-outline-danger ms-2">Xóa màu</a>
+                                        <a href="{{ route('shop.index', array_merge(request()->except('color', 'page'))) }}" 
+                                            class="btn btn-sm btn-outline-danger" style="height: 45px; display: flex; align-items: center;">
+                                            <i class="fa fa-times me-1"></i>Xóa
+                                        </a>
                                     @endif
                                 </div>
                             </div>
                             
                             {{-- Kích cỡ --}}
                             <div class="sidebar__item mb-4 pb-3 border-bottom">
-                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">Kích cỡ</h4>
+                                <h4 class="mb-3 text-dark fw-bold border-bottom pb-2">
+                                    <i class="fa fa-ruler me-2"></i>Kích cỡ
+                                </h4>
                                 <div class="sidebar__item__size d-flex flex-wrap" style="gap: 8px;">
+                                    @php
+                                        $selectedSizes = is_array(request('sizes')) ? array_map('intval', request('sizes')) : [];
+                                    @endphp
                                     @foreach ($sizes as $size)
                                         <label for="size-{{ $size->id }}"
-                                            class="size-label d-flex align-items-center justify-content-center {{ is_array(request('sizes')) && in_array($size->id, request('sizes')) ? 'active' : '' }}"
-                                            style="width: 40px; height: 40px; margin: 0; border: 1px solid #ddd; cursor: pointer; border-radius: 4px; transition: all 0.2s;">
+                                            class="size-label d-flex align-items-center justify-content-center fw-bold
+                                                {{ in_array((int)$size->id, $selectedSizes) ? 'active bg-primary text-white' : 'bg-light text-dark' }}"
+                                            style="width: 50px; height: 50px; margin: 0; border: 2px solid {{ in_array((int)$size->id, $selectedSizes) ? '#007bff' : '#ddd' }}; cursor: pointer; border-radius: 8px; transition: all 0.3s; box-shadow: {{ in_array((int)$size->id, $selectedSizes) ? '0 0 0 3px rgba(0,123,255,0.25)' : 'none' }};">
                                             {{ $size->value }}
                                             <input type="checkbox" name="sizes[]" value="{{ $size->id }}"
                                                 id="size-{{ $size->id }}" style="display:none"
-                                                {{ is_array(request('sizes')) && in_array($size->id, request('sizes')) ? 'checked' : '' }}>
+                                                {{ in_array((int)$size->id, $selectedSizes) ? 'checked' : '' }}>
                                         </label>
                                     @endforeach
                                 </div>
@@ -221,4 +254,131 @@
             </div>
         </div>
     </section>
+
+    <style>
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+        
+        .sidebar__item h4 {
+            font-size: 16px;
+            color: #333;
+        }
+        
+        .filter-radio-input:checked + .filter-option-label {
+            color: #007bff;
+            font-weight: 600;
+        }
+        
+        .filter-option-label {
+            cursor: pointer;
+            transition: all 0.2s;
+            padding-left: 8px;
+        }
+        
+        .filter-option-label:hover {
+            color: #007bff;
+        }
+        
+        .price-range-btn {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s;
+        }
+        
+        .price-range-btn:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,123,255,0.2);
+        }
+        
+        .price-range-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        .color-label:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .size-label:hover {
+            transform: scale(1.1);
+            border-color: #007bff !important;
+        }
+        
+        .size-label.active {
+            background: #007bff !important;
+            color: white !important;
+            border-color: #007bff !important;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-outline-secondary {
+            transition: all 0.3s;
+        }
+        
+        .btn-outline-secondary:hover {
+            transform: translateY(-2px);
+        }
+    </style>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý nút khoảng giá
+            const priceButtons = document.querySelectorAll('.price-range-btn');
+            const minInput = document.getElementById('minRange');
+            const maxInput = document.getElementById('maxRange');
+            
+            // Kiểm tra nút nào đang active
+            const currentMin = minInput.value;
+            const currentMax = maxInput.value;
+            
+            priceButtons.forEach(btn => {
+                if (btn.dataset.min == currentMin && btn.dataset.max == currentMax) {
+                    btn.classList.add('active');
+                }
+                
+                btn.addEventListener('click', function() {
+                    priceButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    minInput.value = this.dataset.min;
+                    maxInput.value = this.dataset.max;
+                });
+            });
+            
+            // Xử lý click vào size label
+            document.querySelectorAll('.size-label').forEach(label => {
+                label.addEventListener('click', function(e) {
+                    if (e.target.tagName !== 'INPUT') {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        if (checkbox) {
+                            checkbox.checked = !checkbox.checked;
+                            if (checkbox.checked) {
+                                this.classList.add('active');
+                            } else {
+                                this.classList.remove('active');
+                            }
+                        }
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

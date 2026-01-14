@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
 use App\Models\Category;
+use App\Models\Voucher;
 
 
 class HomeController extends Controller
@@ -33,8 +34,20 @@ class HomeController extends Controller
         $categories = Category::all();
         $newProducts = Product::orderBy('created_at', 'desc')->take(4)->get();
         $brands = Brand::all();
+        
+        // Lấy voucher đang hoạt động
+        $now = now();
+        $vouchers = Voucher::where('valid_from', '<=', $now)
+            ->where('valid_to', '>=', $now)
+            ->where(function($query) {
+                $query->whereNull('usage_limit')
+                      ->orWhereColumn('used_count', '<', 'usage_limit');
+            })
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
 
-        return view('client.home.index', compact('bestSellers', 'categories', 'newProducts', 'brands', 'topRatedProducts'));
+        return view('client.home.index', compact('bestSellers', 'categories', 'newProducts', 'brands', 'topRatedProducts', 'vouchers'));
     }
 
     public function search(Request $request)

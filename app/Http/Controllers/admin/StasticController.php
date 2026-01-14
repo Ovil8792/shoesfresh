@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class StasticController extends Controller
 {
@@ -65,9 +66,10 @@ class StasticController extends Controller
         $voucherUsed = DB::table('orders')
             ->whereNotNull('voucher_id')
             ->count();
-        // Số lượng người dùng
+        // Số lượng người dùng có quyền khách hàng (role_id = 2) - chỉ đếm tài khoản chưa bị xóa
         $customers = DB::table('users')
-            ->where(['role_id' => 3])
+            ->where('role_id', 2)
+            ->whereNull('deleted_at')
             ->count();
 
         // Doanh thu từng tháng trong năm hiện tại
@@ -212,6 +214,68 @@ class StasticController extends Controller
         ]);
     }
 
+    /**
+     * Get all statistics for a specific date range
+     * 
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDateRangeStatistics(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date'
+        ]);
+
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date') . ' 23:59:59';
+
+        // Calculate online revenue
+        $onlineRevenue = DB::table('orders')
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('total_amount');
+
+        // Calculate POS revenue
+        $posRevenue = DB::table('pos_orders')
+            ->where('status', 'Đã thanh toán')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->sum('total_amount');
+
+        $totalRevenue = $onlineRevenue + $posRevenue;
+
+        // Total orders
+        $totalOrders = DB::table('orders')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        // Pending orders
+        $pendingOrders = DB::table('orders')
+            ->where('status', 'pending')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        // Cancelled orders
+        $cancelledOrders = DB::table('orders')
+            ->where('status', 'cancelled')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+
+        // Top products
+        $bestSellerNames = $this->getTopProducts($startDate, $endDate, 4, 'desc');
+
+        return response()->json([
+            'success' => true,
+            'revenue' => $totalRevenue,
+            'online_revenue' => $onlineRevenue,
+            'pos_revenue' => $posRevenue,
+            'total_orders' => $totalOrders,
+            'pending_orders' => $pendingOrders,
+            'cancelled_orders' => $cancelledOrders,
+            'best_sellers' => $bestSellerNames
+        ]);
+    }
+
     protected function getTopProducts($start, $end, $limit = 4, $direction = 'desc')
     {
         $orderDirection = $direction === 'asc' ? 'asc' : 'desc';
@@ -237,6 +301,7 @@ class StasticController extends Controller
                     'name' => $product->name,
                     'total' => $item->total_sold,
                     'id' => $product->id,
+                    'slug' => Str::slug($product->name),
                 ];
             }
         }

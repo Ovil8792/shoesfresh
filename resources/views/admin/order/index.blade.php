@@ -26,9 +26,9 @@
                             >
                                 <option value="" {{ ($status === '') ? 'selected' : '' }}>-- Tất cả trạng thái --</option>
                                 <option value="processing" {{ ($status === 'processing') ? 'selected' : '' }}>Đang xử lý</option>
+                                <option value="confirmed" {{ ($status === 'confirmed') ? 'selected' : '' }}>Đã xác nhận</option>
                                 <option value="delivering" {{ ($status === 'delivering') ? 'selected' : '' }}>Đang giao</option>
                                 <option value="completed"  {{ ($status === 'completed')  ? 'selected' : '' }}>Hoàn tất</option>
-                                <option value="paid"       {{ ($status === 'paid')       ? 'selected' : '' }}>Đã thanh toán</option>
                                 <option value="cancelled"  {{ ($status === 'cancelled')  ? 'selected' : '' }}>Đã hủy</option>
                             </select>
                             <button
@@ -74,25 +74,46 @@
                                         @php
                                             $badgeClass = match($item->status) {
                                                 'processing'  => 'badge bg-warning text-dark rounded-pill px-3 py-2',
-                                                'delivering'  => 'badge bg-info rounded-pill px-3 py-2',
+                                                'confirmed'   => 'badge bg-info rounded-pill px-3 py-2',
+                                                'delivering'  => 'badge bg-primary rounded-pill px-3 py-2',
                                                 'completed'   => 'badge bg-success rounded-pill px-3 py-2',
                                                 'cancelled'   => 'badge bg-danger rounded-pill px-3 py-2',
-                                                'paid'        => 'badge bg-primary rounded-pill px-3 py-2',
                                                 default       => 'badge bg-secondary rounded-pill px-3 py-2',
                                             };
                                             $statusText = match($item->status) {
                                                 'processing'  => 'Đang xử lý',
+                                                'confirmed'   => 'Đã xác nhận',
                                                 'delivering'  => 'Đang giao',
                                                 'completed'   => 'Hoàn tất',
                                                 'cancelled'   => 'Đã hủy',
-                                                'paid'        => 'Đã thanh toán',
                                                 default       => $item->status,
                                             };
                                         @endphp
                                         <span class="{{ $badgeClass }}">{{ $statusText }}</span>
                                     </td>
 
-                                    <td>{{ strtoupper($item->payment_method) }}</td>
+                                    <td>
+                                        @php
+                                            $pm = strtoupper((string) $item->payment_method);
+                                            $st = (string) $item->status;
+                                            
+                                            // Logic: Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
+                                            if ($st === 'completed') {
+                                                $paymentStatus = 'Đã thanh toán';
+                                                $paymentClass = 'success';
+                                            } elseif ($pm === 'VNPAY' && $st !== 'cancelled') {
+                                                $paymentStatus = 'Đã thanh toán';
+                                                $paymentClass = 'success';
+                                            } elseif ($pm === 'COD') {
+                                                $paymentStatus = 'Chưa thanh toán';
+                                                $paymentClass = 'warning';
+                                            } else {
+                                                $paymentStatus = strtoupper($item->payment_method);
+                                                $paymentClass = 'secondary';
+                                            }
+                                        @endphp
+                                        <span class="badge bg-{{ $paymentClass }}">{{ $paymentStatus }}</span>
+                                    </td>
                                     <td>{{ $item->shipping_address }}</td>
                                     <td>{{ $item->created_at }}</td>
                                     <td class="text-center">

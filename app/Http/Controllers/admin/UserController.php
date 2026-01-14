@@ -104,6 +104,12 @@ class UserController extends Controller
     public function destroy($id)
     {
         $user = User::findOrFail($id);
+        
+        // Kiểm tra nếu là tài khoản quản trị (role_id = 1) thì không cho phép xóa
+        if ($user->role_id == 1) {
+            return redirect()->route('user.index')->with('error', 'Không thể xóa tài khoản có quyền quản trị.');
+        }
+        
         $user->delete();
 
         return redirect()->route('user.index')->with('success', 'Xóa người dùng thành công.');

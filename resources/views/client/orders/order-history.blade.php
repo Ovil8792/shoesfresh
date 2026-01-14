@@ -47,13 +47,16 @@
                     <td>
                         @php
                             $paymentStatus = 'Chưa thanh toán';
-                            if ($order->payment_method === 'VNPAY' && $order->status !== 'pending') {
+                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
+                            if ($order->status === 'completed') {
+                                $paymentStatus = 'Đã thanh toán';
+                            } elseif ($order->payment_method === 'VNPAY' && $order->status !== 'pending') {
                                 $paymentStatus = 'Đã thanh toán';
                             } elseif ($order->payment_method === 'COD') {
                                 $paymentStatus = 'Chưa thanh toán';
                             }
                         @endphp
-                        <span class="fw-bold text-{{ $paymentStatus === 'Đã thanh toán' ? 'success' : 'danger' }}">{{ $paymentStatus }}</span></p>
+                        <span class="fw-bold text-{{ $paymentStatus === 'Đã thanh toán' ? 'success' : 'danger' }}">{{ $paymentStatus }}</span>
                     </td>
                     <td class="text-center">
                         <a href="{{ route('profile.orders.show', $order->id) }}"
