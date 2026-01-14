@@ -29,6 +29,17 @@ class OrderHistoryController extends Controller
         if ($order->status != 'processing') {
             return redirect()->back()->with('error', 'Đơn hàng không thể hủy.');
         }
+        
+        // Hoàn lại usage_limit của voucher nếu đơn hàng có voucher
+        if ($order->voucher_id) {
+            $voucher = \App\Models\Voucher::find($order->voucher_id);
+            if ($voucher) {
+                $voucher->usage_limit += 1;
+                $voucher->used_count = max(0, $voucher->used_count - 1);
+                $voucher->save();
+            }
+        }
+        
         $order->status = 'cancelled';
         $order->cancel_reason = $request->input('cancel_reason');
         $order->save();

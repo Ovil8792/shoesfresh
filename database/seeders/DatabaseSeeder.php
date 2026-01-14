@@ -71,7 +71,10 @@ class DatabaseSeeder extends Seeder
         }
 
         foreach ($dataArray['vouchers'] as $data) {
-            Voucher::create($data);
+            Voucher::updateOrCreate(
+                ['code' => $data['code']], // Tìm theo code
+                $data // Cập nhật hoặc tạo mới
+            );
         }
 
         foreach ($dataArray['blog_categories'] as $data) {

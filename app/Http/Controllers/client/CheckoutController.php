@@ -114,6 +114,16 @@ class CheckoutController extends Controller
 
         DB::beginTransaction();
         try {
+            // Trừ usage_limit của voucher khi đặt hàng thành công
+            if ($voucherId) {
+                $voucherModel = \App\Models\Voucher::find($voucherId);
+                if ($voucherModel && $voucherModel->usage_limit > 0) {
+                    $voucherModel->usage_limit -= 1;
+                    $voucherModel->used_count += 1;
+                    $voucherModel->save();
+                }
+            }
+
             $order = Order::create([
                 'user_id'          => $userId,
                 'name'             => $data['name'],
@@ -185,6 +195,16 @@ class CheckoutController extends Controller
         // Tạo đơn hàng trạng thái pending
         DB::beginTransaction();
         try {
+            // Trừ usage_limit của voucher khi tạo đơn hàng VNPAY
+            if ($voucherId) {
+                $voucherModel = \App\Models\Voucher::find($voucherId);
+                if ($voucherModel && $voucherModel->usage_limit > 0) {
+                    $voucherModel->usage_limit -= 1;
+                    $voucherModel->used_count += 1;
+                    $voucherModel->save();
+                }
+            }
+
             $order = Order::create([
                 'user_id'          => $userId,
                 'name'             => $data['name'] ?? '',

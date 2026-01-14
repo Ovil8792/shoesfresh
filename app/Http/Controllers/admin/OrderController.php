@@ -100,6 +100,7 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($id);
         $oldStatus = $order->status; // Lưu trạng thái cũ
+<<<<<<< HEAD
         $newStatus = $request->input('status');
 
         // Kiểm tra: trạng thái "đã xác nhận" không thể chuyển về "đang xử lý"
@@ -120,6 +121,20 @@ class OrderController extends Controller
         }
 
         $order->status = $newStatus;
+=======
+        
+        // Nếu chuyển sang trạng thái cancelled và đơn hàng có voucher, hoàn lại usage_limit
+        if ($request->input('status') === Order::STATUS_CANCELLED && $oldStatus !== Order::STATUS_CANCELLED && $order->voucher_id) {
+            $voucher = \App\Models\Voucher::find($order->voucher_id);
+            if ($voucher) {
+                $voucher->usage_limit += 1;
+                $voucher->used_count = max(0, $voucher->used_count - 1);
+                $voucher->save();
+            }
+        }
+        
+        $order->status = $request->input('status');
+>>>>>>> 05f85ca15dff40273e14ad77a13b92ffe7b6f690
         $order->cancel_reason = $request->input('cancel_reason');
         $order->save();
 

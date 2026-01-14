@@ -118,7 +118,7 @@
                                         @csrf
                                         <input type="text" name="voucher_code" placeholder="Nhập mã giảm giá" required
                                             class="form-control" style="max-width: 180px;">
-                                        <button type="submit" class="btn btn-link text-dark ms-2">Áp dụng</button>
+                                        <button type="submit" class="btn btn-link text-dark ms-2" style="text-decoration: none !important;">Áp dụng</button>
                                     </form>
                                     @if (session('voucher'))
                                         <form id="removeVoucherForm" action="{{ route('cart.removeVoucher') }}"
@@ -235,14 +235,14 @@
             <form id="voucherForm" action="{{ route('cart.applyVoucher') }}" method="POST" class="d-flex align-items-center">
                 @csrf
                 <input type="text" name="voucher_code" placeholder="Nhập mã giảm giá" required class="form-control" style="max-width: 180px;">
-                <button type="submit" class="btn btn-link text-dark ms-2">Áp dụng</button>
+                <button type="submit" class="btn btn-link text-dark ms-2" style="text-decoration: none !important;">Áp dụng</button>
             </form>
         `;
             if (hasVoucher) {
                 html += `
             <form id="removeVoucherForm" action="{{ route('cart.removeVoucher') }}" method="POST" style="margin-left:16px;">
                 @csrf
-                <button type="submit" class="btn btn-link text-danger ">
+                <button type="submit" class="btn btn-link text-dark      text-decoration-none">
                     <i class="bi bi-x-circle"></i> Hủy mã
                 </button>
             </form>
