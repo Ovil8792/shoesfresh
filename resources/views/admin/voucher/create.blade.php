@@ -39,15 +39,15 @@
           </div>
           <div class="mb-3">
             <label for="max_discount" class="form-label">Giảm tối đa</label>
-            <input type="number" class="form-control" id="max_discount" name="max_discount" min="0">
+            <input type="number" class="form-control" id="max_discount" name="max_discount" required min="0">
           </div>
           <div class="mb-3">
             <label for="min_order_value" class="form-label">Giá trị đơn tối thiểu</label>
-            <input type="number" class="form-control" id="min_order_value" name="min_order_value" min="0">
+            <input type="number" class="form-control" id="min_order_value" name="min_order_value" required min="0">
           </div>
           <div class="mb-3">
             <label for="usage_limit" class="form-label">Số lượt sử dụng</label>
-            <input type="number" class="form-control" id="usage_limit" name="usage_limit" min="1">
+            <input type="number" class="form-control" id="usage_limit" name="usage_limit" required min="1">
           </div>
           <div class="mb-3">
             <label for="valid_from" class="form-label">Ngày bắt đầu</label>

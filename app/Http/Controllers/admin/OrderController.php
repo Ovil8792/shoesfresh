@@ -100,28 +100,28 @@ class OrderController extends Controller
 
         $order = Order::findOrFail($id);
         $oldStatus = $order->status; // Lưu trạng thái cũ
-<<<<<<< HEAD
-        $newStatus = $request->input('status');
+// <<<<<<< HEAD
+//         $newStatus = $request->input('status');
 
-        // Kiểm tra: trạng thái "đã xác nhận" không thể chuyển về "đang xử lý"
-        if ($oldStatus == Order::STATUS_CONFIRMED && $newStatus == Order::STATUS_PROCESSING) {
-            return redirect()->back()->with('error', 'Đơn hàng đã xác nhận không thể chuyển về trạng thái "Đang xử lý".');
-        }
+//         // Kiểm tra: trạng thái "đã xác nhận" không thể chuyển về "đang xử lý"
+//         if ($oldStatus == Order::STATUS_CONFIRMED && $newStatus == Order::STATUS_PROCESSING) {
+//             return redirect()->back()->with('error', 'Đơn hàng đã xác nhận không thể chuyển về trạng thái "Đang xử lý".');
+//         }
 
-        // Kiểm tra: nếu đơn hàng đang ở trạng thái "đang giao", chỉ cho phép chuyển sang "hoàn tất" hoặc "đã hủy"
-        if ($oldStatus == Order::STATUS_DELIVERING) {
-            if (!in_array($newStatus, [Order::STATUS_COMPLETED, Order::STATUS_CANCELLED], true)) {
-                return redirect()->back()->with('error', 'Đơn hàng đang giao chỉ có thể chuyển sang "Hoàn tất" hoặc "Đã hủy".');
-            }
-        }
+//         // Kiểm tra: nếu đơn hàng đang ở trạng thái "đang giao", chỉ cho phép chuyển sang "hoàn tất" hoặc "đã hủy"
+//         if ($oldStatus == Order::STATUS_DELIVERING) {
+//             if (!in_array($newStatus, [Order::STATUS_COMPLETED, Order::STATUS_CANCELLED], true)) {
+//                 return redirect()->back()->with('error', 'Đơn hàng đang giao chỉ có thể chuyển sang "Hoàn tất" hoặc "Đã hủy".');
+//             }
+//         }
 
-        // Kiểm tra: chỉ có trạng thái "đang giao" mới có thể chuyển sang "hoàn tất"
-        if ($newStatus == Order::STATUS_COMPLETED && $oldStatus != Order::STATUS_DELIVERING) {
-            return redirect()->back()->with('error', 'Chỉ có đơn hàng đang giao mới có thể chuyển sang trạng thái "Hoàn tất".');
-        }
+//         // Kiểm tra: chỉ có trạng thái "đang giao" mới có thể chuyển sang "hoàn tất"
+//         if ($newStatus == Order::STATUS_COMPLETED && $oldStatus != Order::STATUS_DELIVERING) {
+//             return redirect()->back()->with('error', 'Chỉ có đơn hàng đang giao mới có thể chuyển sang trạng thái "Hoàn tất".');
+//         }
 
-        $order->status = $newStatus;
-=======
+//         $order->status = $newStatus;
+// =======
         
         // Nếu chuyển sang trạng thái cancelled và đơn hàng có voucher, hoàn lại usage_limit
         if ($request->input('status') === Order::STATUS_CANCELLED && $oldStatus !== Order::STATUS_CANCELLED && $order->voucher_id) {
@@ -134,7 +134,7 @@ class OrderController extends Controller
         }
         
         $order->status = $request->input('status');
->>>>>>> 05f85ca15dff40273e14ad77a13b92ffe7b6f690
+// >>>>>>> 05f85ca15dff40273e14ad77a13b92ffe7b6f690
         $order->cancel_reason = $request->input('cancel_reason');
         $order->save();
 
