@@ -97,6 +97,9 @@
                         @error('email')
                             <p class="text-danger small mt-1">{{ $message }}</p>
                         @enderror
+                        @error('password')
+                            <p class="text-danger small mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="form-check">

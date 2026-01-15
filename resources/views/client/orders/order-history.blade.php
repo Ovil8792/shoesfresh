@@ -46,17 +46,29 @@
                     </td>
                     <td>
                         @php
-                            $paymentStatus = 'Chưa thanh toán';
-                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
-                            if ($order->status === 'completed') {
+                            $pm = strtoupper((string) $order->payment_method);
+                            $st = (string) $order->status;
+                            
+                            // Logic: Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
+                            if ($st === 'completed') {
                                 $paymentStatus = 'Đã thanh toán';
-                            } elseif ($order->payment_method === 'VNPAY' && $order->status !== 'pending') {
+                                $paymentClass = 'success';
+                            } elseif ($pm === 'VNPAY') {
+                                // Nếu thanh toán bằng VNPay, kể cả khi hủy vẫn hiển thị đã thanh toán
                                 $paymentStatus = 'Đã thanh toán';
-                            } elseif ($order->payment_method === 'COD') {
+                                $paymentClass = 'success';
+                            } elseif ($pm === 'COD') {
                                 $paymentStatus = 'Chưa thanh toán';
+                                $paymentClass = 'danger';
+                            } else {
+                                $paymentStatus = 'Chưa thanh toán';
+                                $paymentClass = 'danger';
                             }
                         @endphp
-                        <span class="fw-bold text-{{ $paymentStatus === 'Đã thanh toán' ? 'success' : 'danger' }}">{{ $paymentStatus }}</span>
+                        <span class="fw-bold text-{{ $paymentClass }}">{{ $paymentStatus }}</span>
+                        @if($st === 'cancelled' && $pm === 'VNPAY')
+                            <br><small class="text-danger">(Đang xử lý hoàn tiền)</small>
+                        @endif
                     </td>
                     <td class="text-center">
                         <a href="{{ route('profile.orders.show', $order->id) }}"

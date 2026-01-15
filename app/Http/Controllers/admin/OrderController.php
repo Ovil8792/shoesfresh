@@ -43,8 +43,11 @@ class OrderController extends Controller
             Order::STATUS_CANCELLED,
         ];
 
-        // Mặc định hiển thị tất cả đơn hàng
+        // Mặc định hiển thị tất cả đơn hàng (trừ delivering - đơn đang giao sẽ hiển thị ở delivery)
         $status = (string) $request->query('status', '');
+        
+        // Loại bỏ đơn hàng có trạng thái delivering khỏi danh sách order
+        $query->where('status', '!=', Order::STATUS_DELIVERING);
         
         // Nếu có chọn lọc trạng thái thì mới thêm điều kiện where
         if ($status !== '' && in_array($status, $allowed, true)) {
@@ -53,12 +56,11 @@ class OrderController extends Controller
 
         $orders = $query->latest()->paginate(15)->appends($request->query());
 
-        // Options cho dropdown ("" = tất cả)
+        // Options cho dropdown ("" = tất cả, loại bỏ delivering vì đã ẩn)
         $statusOptions = [
             ''                          => 'Tất cả trạng thái',
             Order::STATUS_PROCESSING     => 'Đang xử lý',
             Order::STATUS_CONFIRMED      => 'Đã xác nhận',
-            Order::STATUS_DELIVERING     => 'Đang giao',
             Order::STATUS_COMPLETED      => 'Hoàn tất',
             Order::STATUS_CANCELLED      => 'Đã hủy',
         ];
@@ -134,9 +136,13 @@ class OrderController extends Controller
         }
         
         $order->status = $request->input('status');
-// >>>>>>> 05f85ca15dff40273e14ad77a13b92ffe7b6f690
         $order->cancel_reason = $request->input('cancel_reason');
         $order->save();
+
+        // Nếu chuyển sang trạng thái delivering, redirect về delivery.index
+        if ($order->status === Order::STATUS_DELIVERING) {
+            return redirect()->route('delivery.index')->with('success', 'Đơn hàng đã chuyển sang trạng thái đang giao!');
+        }
 
         // Chuyển hướng về trang danh sách đơn hàng với trạng thái mới
         $redirectUrl = route('order.index') . '?status=' . $order->status;

@@ -38,28 +38,25 @@
                 </div>
                 <div class="col-md-6">
                     @php
-                        if ($order->payment_method === 'COD') {
+                        $pm = strtoupper((string) $order->payment_method);
+                        $st = (string) $order->status;
+                        
+                        if ($pm === 'COD') {
                             $paymentLabel = 'Thanh toán khi nhận hàng';
-                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
-                            if ($order->status === 'completed') {
+                            if ($st === 'completed') {
                                 $paymentStatus = 'Đã thanh toán';
                                 $showStatus = true;
                             } else {
                                 $showStatus = false;
                             }
-                        } elseif ($order->payment_method === 'VNPAY') {
+                        } elseif ($pm === 'VNPAY') {
                             $paymentLabel = 'VNPAY';
-                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
-                            if ($order->status === 'completed') {
-                                $paymentStatus = 'Đã thanh toán';
-                            } else {
-                                $paymentStatus = $order->status === 'pending' ? 'Chưa thanh toán' : 'Đã thanh toán';
-                            }
+                            // Nếu thanh toán bằng VNPay, kể cả khi hủy vẫn hiển thị đã thanh toán
+                            $paymentStatus = 'Đã thanh toán';
                             $showStatus = true;
                         } else {
                             $paymentLabel = $order->payment_method;
-                            // Nếu đơn hàng đã hoàn thành thì phải đã thanh toán
-                            if ($order->status === 'completed') {
+                            if ($st === 'completed') {
                                 $paymentStatus = 'Đã thanh toán';
                             } else {
                                 $paymentStatus = 'Không xác định';
@@ -71,6 +68,9 @@
                     <p><b>Thanh toán:</b> {{ $paymentLabel }}
                         @if($showStatus)
                             - <span class="fw-bold text-{{ $paymentStatus === 'Đã thanh toán' ? 'success' : 'danger' }}">{{ $paymentStatus }}</span>
+                            @if($st === 'cancelled' && $pm === 'VNPAY')
+                                <br><small class="text-danger">⚠️ Đơn hàng đã hủy - Đang xử lý hoàn tiền</small>
+                            @endif
                         @endif
                     </p>
 

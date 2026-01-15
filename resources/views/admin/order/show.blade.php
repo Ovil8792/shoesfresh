@@ -55,7 +55,7 @@
                                             <option value="confirmed"  {{ $order->status == 'confirmed'  ? 'selected' : '' }}
                                                 {{ $order->status == 'delivering' ? 'disabled' : '' }}>Đã xác nhận</option>
                                             <option value="delivering" {{ $order->status == 'delivering' ? 'selected' : '' }}
-                                                {{ $order->status == 'delivering' ? 'disabled' : '' }}>Đang giao</option>
+                                                {{ $order->status == 'delivering' || $order->status == 'completed' || $order->status == 'cancelled' ? 'disabled' : '' }}>Đang giao</option>
                                             <option value="completed"  {{ $order->status == 'completed'  ? 'selected' : '' }}
                                                 {{ $order->status != 'delivering' ? 'disabled' : '' }}>Hoàn tất</option>
                                             <option value="cancelled"  {{ $order->status == 'cancelled'  ? 'selected' : '' }}>Đã hủy</option>
@@ -87,7 +87,8 @@
                                         if ($st === 'completed') {
                                             $paymentStatus = 'Đã thanh toán';
                                             $paymentClass = 'success';
-                                        } elseif ($pm === 'VNPAY' && $st !== 'cancelled') {
+                                        } elseif ($pm === 'VNPAY') {
+                                            // Nếu thanh toán bằng VNPay, kể cả khi hủy vẫn hiển thị đã thanh toán
                                             $paymentStatus = 'Đã thanh toán';
                                             $paymentClass = 'success';
                                         } elseif ($pm === 'COD') {
@@ -100,6 +101,9 @@
                                     @endphp
 
                                     <span class="badge bg-{{ $paymentClass }}">{{ $paymentStatus }}</span>
+                                    @if($st === 'cancelled' && $pm === 'VNPAY')
+                                        <br><small class="text-danger mt-2 d-block">⚠️ Đơn hàng đã hủy - Cần hoàn tiền cho khách hàng</small>
+                                    @endif
                                 </td>
                             </tr>
 
