@@ -49,9 +49,9 @@ class ShopController extends Controller
             });
         }
         if ($request->filled('sizes')) {
-            $sizes = $request->sizes;
-            $query->whereHas('variants', function($q) use ($sizes) {
-                $q->whereIn('size_id', $sizes);
+            $selectedSizes = is_array($request->sizes) ? $request->sizes : [$request->sizes];
+            $query->whereHas('variants', function($q) use ($selectedSizes) {
+                $q->whereIn('size_id', $selectedSizes);
             });
         }
         if ($request->filled('sort')) {

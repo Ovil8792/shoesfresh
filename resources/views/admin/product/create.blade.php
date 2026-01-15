@@ -10,6 +10,23 @@
             <strong>Thông tin sản phẩm</strong>
         </div>
         <div class="card-body">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading">Có lỗi xảy ra:</h5>
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+            
+            @if (session('error'))
+                <div class="alert alert-danger">
+                    {{ session('error') }}
+                </div>
+            @endif
+            
             <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
@@ -17,7 +34,7 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control" id="name" name="name" value="{{ old('name') }}" required>
                         @error('name')
                             <div class="text-danger small">{{ $message }}</div>
                         @enderror
@@ -27,7 +44,7 @@
                         <select class="form-select" id="category_id" name="category_id" required>
                             <option value="">-- Chọn danh mục --</option>
                             @foreach ($categories as $category)
-                                <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
                             @endforeach
                         </select>
                         @error('category_id')
@@ -39,7 +56,7 @@
                         <select class="form-select" id="brand_id" name="brand_id" required>
                             <option value="">-- Chọn thương hiệu --</option>
                             @foreach ($brands as $brand)
-                                <option value="{{ $brand->id }}">{{ $brand->name }}</option>
+                                <option value="{{ $brand->id }}" {{ old('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
                             @endforeach
                         </select>
                         @error('brand_id')
@@ -52,7 +69,7 @@
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
                         <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
-                        <input type="number" class="form-control" id="price" name="price" min="1" step="1000" required>
+                        <input type="number" class="form-control" id="price" name="price" min="1" step="1" value="{{ old('price') }}" required>
                         @error('price')
                             <div class="text-danger small">{{ $message }}</div>
                         @enderror
@@ -81,7 +98,26 @@
 
                 {{-- Biến thể sản phẩm --}}
                 <div class="mt-4">
-                    <label class="form-label">Biến thể sản phẩm</label>
+                    <label class="form-label">Biến thể sản phẩm <span class="text-danger">*</span></label>
+                    @error('variants')
+                        <div class="text-danger small mb-2">{{ $message }}</div>
+                    @enderror
+                    @if($errors->has('variants.*'))
+                        <div class="alert alert-danger small mb-2">
+                            <strong>Lỗi biến thể:</strong>
+                            <ul class="mb-0">
+                                @foreach($errors->get('variants.*') as $error)
+                                    @if(is_array($error))
+                                        @foreach($error as $e)
+                                            <li>{{ $e }}</li>
+                                        @endforeach
+                                    @else
+                                        <li>{{ $error }}</li>
+                                    @endif
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
                     <table class="table table-bordered align-middle" id="variant-table">
                         <thead class="table-light">
                             <tr>
@@ -97,23 +133,35 @@
                                     <select name="variants[0][size_id]" class="form-select" required>
                                         <option value="">-- Chọn kích cỡ --</option>
                                         @foreach ($sizes as $size)
-                                            <option value="{{ $size->id }}">{{ $size->value }}</option>
+                                            <option value="{{ $size->id }}" {{ old('variants.0.size_id') == $size->id ? 'selected' : '' }}>{{ $size->value }}</option>
                                         @endforeach
                                     </select>
+                                    @error('variants.0.size_id')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </td>
                                 <td>
                                     <select name="variants[0][color_id]" class="form-select" required>
                                         <option value="">-- Chọn màu --</option>
                                         @foreach ($colors as $color)
-                                            <option value="{{ $color->id }}">{{ $color->name }}</option>
+                                            <option value="{{ $color->id }}" {{ old('variants.0.color_id') == $color->id ? 'selected' : '' }}>{{ $color->name }}</option>
                                         @endforeach
                                     </select>
+                                    @error('variants.0.color_id')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </td>
                                 <td>
-                                    <input type="number" name="variants[0][price]" class="form-control" min="1" step="1000" required>
+                                    <input type="number" name="variants[0][price]" class="form-control" min="1" step="1" value="{{ old('variants.0.price') }}" required>
+                                    @error('variants.0.price')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </td>
                                 <td>
-                                    <input type="number" name="variants[0][stock]" class="form-control" min="0" required>
+                                    <input type="number" name="variants[0][stock]" class="form-control" min="0" value="{{ old('variants.0.stock') }}" required>
+                                    @error('variants.0.stock')
+                                        <div class="text-danger small">{{ $message }}</div>
+                                    @enderror
                                 </td>
                             </tr>
                         </tbody>
@@ -156,7 +204,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" name="variants[${variantIndex}][price]" class="form-control">
+                        <input type="number" name="variants[${variantIndex}][price]" class="form-control" min="1" step="1" required>
                     </td>
                     <td>
                         <input type="number" name="variants[${variantIndex}][stock]" class="form-control">

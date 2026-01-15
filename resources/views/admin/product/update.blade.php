@@ -59,7 +59,7 @@
                     <div class="col-md-4">
                         <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="price" name="price"
-                            value="{{ old('price', $product->price) }}" min="1" step="1000" required>
+                            value="{{ old('price', $product->price) }}" min="1" step="1" required>
                         @error('price')
                             <div class="text-danger small">{{ $message }}</div>
                         @enderror
@@ -129,7 +129,7 @@
                                     </td>
                                     <td>
                                         <input type="number" name="variants[{{ $i }}][price]"
-                                            class="form-control" value="{{ $variant->price }}" required>
+                                            class="form-control" value="{{ $variant->price }}" min="1" step="1" required>
                                     </td>
                                     <td>
                                         <input type="number" name="variants[{{ $i }}][stock]"
@@ -158,7 +158,7 @@
                                         </select>
                                     </td>
                                     <td>
-                                        <input type="number" name="variants[0][price]" class="form-control" required>
+                                        <input type="number" name="variants[0][price]" class="form-control" min="1" step="1" required>
                                     </td>
                                     <td>
                                         <input type="number" name="variants[0][stock]" class="form-control" required>
@@ -210,7 +210,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" name="variants[${variantIndex}][price]" class="form-control" required>
+                        <input type="number" name="variants[${variantIndex}][price]" class="form-control" min="1" step="1" required>
                     </td>
                     <td>
                         <input type="number" name="variants[${variantIndex}][stock]" class="form-control" required>
