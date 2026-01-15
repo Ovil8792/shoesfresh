@@ -123,8 +123,9 @@ Route::prefix('admin')->group(function () {
         Route::prefix('delivery')->group(function () {
             Route::get('', [DeliveryController::class, 'index'])->name('delivery.index');
             Route::get('show/{id}', [DeliveryController::class, 'show'])->name('delivery.show');
-            Route::get('accept/{id}', [DeliveryController::class, 'accept'])->name('delivery.accept');
+            Route::post('accept/{id}', [DeliveryController::class, 'accept'])->name('delivery.accept');
             Route::get('cancel/{id}', [DeliveryController::class, 'cancel'])->name('delivery.cancel');
+            Route::post('confirm/{id}', [DeliveryController::class, 'confirmDelivery'])->name('delivery.confirm');
         });
         // Quản lý contact
         Route::prefix('contact')->group(function () {

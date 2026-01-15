@@ -27,7 +27,6 @@
                                 <option value="" {{ ($status === '') ? 'selected' : '' }}>-- Tất cả trạng thái --</option>
                                 <option value="processing" {{ ($status === 'processing') ? 'selected' : '' }}>Đang xử lý</option>
                                 <option value="confirmed" {{ ($status === 'confirmed') ? 'selected' : '' }}>Đã xác nhận</option>
-                                <option value="delivering" {{ ($status === 'delivering') ? 'selected' : '' }}>Đang giao</option>
                                 <option value="completed"  {{ ($status === 'completed')  ? 'selected' : '' }}>Hoàn tất</option>
                                 <option value="cancelled"  {{ ($status === 'cancelled')  ? 'selected' : '' }}>Đã hủy</option>
                             </select>
@@ -101,7 +100,8 @@
                                             if ($st === 'completed') {
                                                 $paymentStatus = 'Đã thanh toán';
                                                 $paymentClass = 'success';
-                                            } elseif ($pm === 'VNPAY' && $st !== 'cancelled') {
+                                            } elseif ($pm === 'VNPAY') {
+                                                // Nếu thanh toán bằng VNPay, kể cả khi hủy vẫn hiển thị đã thanh toán
                                                 $paymentStatus = 'Đã thanh toán';
                                                 $paymentClass = 'success';
                                             } elseif ($pm === 'COD') {
@@ -113,6 +113,9 @@
                                             }
                                         @endphp
                                         <span class="badge bg-{{ $paymentClass }}">{{ $paymentStatus }}</span>
+                                        @if($st === 'cancelled' && $pm === 'VNPAY')
+                                            <br><small class="text-danger">(Cần hoàn tiền)</small>
+                                        @endif
                                     </td>
                                     <td>{{ $item->shipping_address }}</td>
                                     <td>{{ $item->created_at }}</td>

@@ -199,7 +199,7 @@
             left: 0;
             width: 100%;
             z-index: 1000;
-            background: #ffddb3; /* Light orange background */
+            background: #fffcb8; /* Light orange background */
             box-shadow: 0 2px 8px rgb(255, 255, 255);
             transition: all 0.3s;
         }

@@ -52,6 +52,34 @@ class ProductController extends Controller
 
     public function store(Request $request)
     {
+        // Validate dữ liệu đầu vào
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'required|exists:brands,id',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'status' => 'required|in:0,1',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'variants' => 'required|array|min:1',
+            'variants.*.size_id' => 'required|exists:sizes,id',
+            'variants.*.color_id' => 'required|exists:colors,id',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.stock' => 'required|integer|min:0',
+        ], [
+            'name.required' => 'Tên sản phẩm không được để trống.',
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'brand_id.required' => 'Vui lòng chọn thương hiệu.',
+            'price.required' => 'Giá sản phẩm không được để trống.',
+            'price.numeric' => 'Giá sản phẩm phải là số.',
+            'price.min' => 'Giá sản phẩm phải lớn hơn hoặc bằng 0.',
+            'variants.required' => 'Bạn phải thêm ít nhất một biến thể sản phẩm.',
+            'variants.*.size_id.required' => 'Vui lòng chọn kích cỡ cho biến thể.',
+            'variants.*.color_id.required' => 'Vui lòng chọn màu sắc cho biến thể.',
+            'variants.*.price.required' => 'Giá biến thể không được để trống.',
+            'variants.*.stock.required' => 'Số lượng tồn kho không được để trống.',
+        ]);
+
         DB::beginTransaction();
         try {
             // upload image
@@ -76,7 +104,7 @@ class ProductController extends Controller
             if (!$hasValidVariant) {
                 return redirect()->back()
                     ->withInput()
-                    ->with('error', 'Bạn phải thêm ít nhất một biến thể sản phẩm!');
+                    ->withErrors(['variants' => 'Bạn phải thêm ít nhất một biến thể sản phẩm!']);
             }
 
             // Thêm mới sản phẩm
@@ -154,6 +182,34 @@ class ProductController extends Controller
      */
     public function update(Request $request, string $id)
     {
+        // Validate dữ liệu đầu vào
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'brand_id' => 'required|exists:brands,id',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'status' => 'required|in:0,1',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'variants' => 'required|array|min:1',
+            'variants.*.size_id' => 'required|exists:sizes,id',
+            'variants.*.color_id' => 'required|exists:colors,id',
+            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.stock' => 'required|integer|min:0',
+        ], [
+            'name.required' => 'Tên sản phẩm không được để trống.',
+            'category_id.required' => 'Vui lòng chọn danh mục.',
+            'brand_id.required' => 'Vui lòng chọn thương hiệu.',
+            'price.required' => 'Giá sản phẩm không được để trống.',
+            'price.numeric' => 'Giá sản phẩm phải là số.',
+            'price.min' => 'Giá sản phẩm phải lớn hơn hoặc bằng 0.',
+            'variants.required' => 'Bạn phải thêm ít nhất một biến thể sản phẩm.',
+            'variants.*.size_id.required' => 'Vui lòng chọn kích cỡ cho biến thể.',
+            'variants.*.color_id.required' => 'Vui lòng chọn màu sắc cho biến thể.',
+            'variants.*.price.required' => 'Giá biến thể không được để trống.',
+            'variants.*.stock.required' => 'Số lượng tồn kho không được để trống.',
+        ]);
+
         DB::beginTransaction();
         try {
             $product = Product::findOrFail($id);

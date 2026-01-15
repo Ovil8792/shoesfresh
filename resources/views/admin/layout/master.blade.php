@@ -136,12 +136,7 @@
                                     <span>Kích cỡ</span>
                                 </a>
                             </li>
-                            <li class="nav-item {{ $isActive(['admin/discounts*']) ? 'active' : '' }}">
-                                <a href="{{ route('admin.discounts.index') }}" data-spa-link>
-                                    <span class="nav-icon"><i class="bi bi-tag"></i></span>
-                                    <span>Giảm giá sản phẩm</span>
-                                </a>
-                            </li>
+                            
                         </ul>
                     </section>
 

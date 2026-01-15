@@ -162,13 +162,7 @@
                             <div class="col-lg-6 col-md-6">
                                 <div class="filter__sort d-flex align-items-center gap-2">
                                     <span class="text-muted small">Sắp xếp theo:</span>
-                                    <select class="form-select form-select-sm w-auto" id="sortSelect" onchange="document.getElementById('sortForm').submit()">
-                                        <option value="">Mặc định</option>
-                                        <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
-                                        <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá giảm dần</option>
-                                        <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới nhất</option>
-                                    </select>
-                                    <form method="GET" id="sortForm">
+                                    <form method="GET" id="sortForm" action="{{ route('shop.index') }}">
                                         {{-- Giữ lại các tham số lọc khác --}}
                                         @foreach (request()->except('sort', 'page') as $key => $value)
                                             @if (is_array($value))
@@ -179,7 +173,12 @@
                                                 <input type="hidden" name="{{ $key }}" value="{{ $value }}">
                                             @endif
                                         @endforeach
-                                        <input type="hidden" name="sort" id="sortInput" value="{{ request('sort') }}">
+                                        <select class="form-select form-select-sm w-auto" id="sortSelect" name="sort" onchange="this.form.submit()">
+                                            <option value="">Mặc định</option>
+                                            <option value="price_asc" {{ request('sort') == 'price_asc' ? 'selected' : '' }}>Giá tăng dần</option>
+                                            <option value="price_desc" {{ request('sort') == 'price_desc' ? 'selected' : '' }}>Giá giảm dần</option>
+                                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Mới nhất</option>
+                                        </select>
                                     </form>
                                 </div>
                             </div>

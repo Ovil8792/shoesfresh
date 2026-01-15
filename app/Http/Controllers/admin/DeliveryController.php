@@ -39,13 +39,40 @@ class DeliveryController extends Controller
     {
         $adminId = session('admin')['id'];
 
-        // Nhận đơn hàng
-        $delivery = Delivery::findOrFail($id);
-        $delivery->status = 'accepted';
-        $delivery->user_id = $adminId;
-        $delivery->created_at = now();
-        $delivery->save();
+        // Nhận đơn hàng - tạo delivery record nếu chưa có
+        $order = Order::findOrFail($id);
+        
+        $delivery = Delivery::firstOrCreate(
+            ['order_id' => $id],
+            [
+                'user_id' => $adminId,
+                'status' => 'accepted',
+            ]
+        );
+        
+        if (!$delivery->user_id) {
+            $delivery->user_id = $adminId;
+            $delivery->status = 'accepted';
+            $delivery->save();
+        }
+        
         return redirect()->route('delivery.index')->with('success', 'Đơn hàng đã được nhận thành công.');
+    }
+    
+    public function confirmDelivery($id)
+    {
+        $order = Order::findOrFail($id);
+        
+        // Chỉ cho phép xác nhận đơn hàng đang giao
+        if ($order->status !== Order::STATUS_DELIVERING) {
+            return redirect()->route('delivery.index')->with('error', 'Chỉ có thể xác nhận đơn hàng đang giao.');
+        }
+        
+        // Chuyển trạng thái sang completed
+        $order->status = Order::STATUS_COMPLETED;
+        $order->save();
+        
+        return redirect()->route('delivery.index')->with('success', 'Xác nhận giao hàng thành công!');
     }
     public function cancel($id)
     {
