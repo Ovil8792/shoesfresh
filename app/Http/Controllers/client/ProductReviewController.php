@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Review;
+use App\Models\User;
 
 class ProductReviewController extends Controller
 {
@@ -17,6 +18,15 @@ class ProductReviewController extends Controller
             'success' => false,
             'message' => 'Vui lòng đăng nhập để đánh giá.'
         ], 401);
+    }
+
+    // Kiểm tra xem user đã mua sản phẩm trong đơn hàng đã hoàn thành chưa
+    $userModel = User::find($user['id']);
+    if (!$userModel || !$userModel->hasPurchasedProductInCompletedOrder($id)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.'
+        ], 403);
     }
 
     $validated = $request->validate([

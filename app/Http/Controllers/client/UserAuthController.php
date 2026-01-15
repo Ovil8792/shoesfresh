@@ -44,7 +44,8 @@ class UserAuthController extends Controller
     }
     public function showProfile()
     {
-        $user = session('user');
+        $usersession = session('user');
+        $user = User::find($usersession['id']);
         return view('client.account.profile', compact('user'));
     }
     public function updateProfile(Request $request)

@@ -34,7 +34,7 @@ class LoginController extends Controller
         if ($user) {
             if ($user->role_id == 1) {
                 session(['admin' => $user->toArray()]);
-                return redirect('/admin/category')->with('success', 'Đăng nhập thành công!');
+                return redirect('/admin/stastic')->with('success', 'Đăng nhập thành công!');
             } else if ($user->role_id == 3) {
                 session(['admin' => $user->toArray()]);
                 return redirect('/pos')->with('success', 'Đăng nhập thành công!');

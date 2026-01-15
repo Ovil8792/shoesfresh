@@ -4,6 +4,8 @@ namespace App\Http\Controllers\client;
 use App\Http\Controllers\Controller;
 
 use App\Models\Order;
+use App\Models\Comment;
+use App\Models\Review;
 use Illuminate\Http\Request;
 
 
@@ -18,10 +20,27 @@ class OrderHistoryController extends Controller
     }
     public function show($id)
 {
-    $order = Order::with(['orderItems.product', 'orderItems.variant'])
+    $order = Order::with(['orderItems.variant.product', 'orderItems.variant.color', 'orderItems.variant.size'])
         ->where('user_id', session('user.id'))
         ->findOrFail($id);
-    return view('client.orders.order-detail', compact('order'));
+    
+    // Lấy comments và reviews cho các sản phẩm trong đơn hàng
+    $productIds = $order->orderItems->pluck('variant.product_id')->unique()->filter();
+    $comments = Comment::whereIn('product_id', $productIds)
+        ->where('status', true)
+        ->where('user_id', session('user.id'))
+        ->get()
+        ->groupBy('product_id');
+    
+    $reviews = Review::whereIn('product_id', $productIds)
+        ->where('user_id', session('user.id'))
+        ->get()
+        ->keyBy('product_id');
+    
+    // Kiểm tra xem đơn hàng đã hoàn thành chưa
+    $canComment = $order->status === 'completed';
+    
+    return view('client.orders.order-detail', compact('order', 'comments', 'reviews', 'canComment'));
 }
         public function cancel(Request $request, $id)
     {

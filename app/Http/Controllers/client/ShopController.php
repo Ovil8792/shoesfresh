@@ -15,6 +15,8 @@ use App\Models\Review;
 use App\Models\Size;
 use App\Models\Color;
 use App\Models\Brand;
+use App\Models\User;
+use App\Models\Order;
 
 
 
@@ -125,14 +127,21 @@ class ShopController extends Controller
         $reviews = Review::where('product_id', $product->id)->get();
         $averageRating = $reviews->avg('rating') ?? 0;
         $existingRating = null;
+        $canCommentReview = false;
         if (session('user')) {
         $userId = session('user')['id'];
         $existingRating = Review::where('product_id', $product->id)
         ->where('user_id', $userId)
         ->value('rating');
+        
+        // Kiểm tra xem user đã mua sản phẩm trong đơn hàng đã hoàn thành chưa
+        $userModel = User::find($userId);
+        if ($userModel) {
+            $canCommentReview = $userModel->hasPurchasedProductInCompletedOrder($product->id);
+        }
         }
 
-        return view('client.shop.product-detail', compact('product', 'relatedProducts', 'variants', 'comments', 'commentCount', 'averageRating', 'reviews', 'existingRating'));
+        return view('client.shop.product-detail', compact('product', 'relatedProducts', 'variants', 'comments', 'commentCount', 'averageRating', 'reviews', 'existingRating', 'canCommentReview'));
     }
 
     public function addToCart(Request $request, $id)

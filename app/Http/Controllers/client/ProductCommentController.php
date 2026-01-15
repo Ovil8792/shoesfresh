@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Client;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Comment;
+use App\Models\User;
 
 class ProductCommentController extends Controller
 {
@@ -13,13 +14,25 @@ class ProductCommentController extends Controller
     $user = session('user');
 
     if (!$user) {
-        if ($request->ajax()) {
+        if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
             return response()->json([
                 'status' => false,
                 'message' => 'Vui lòng đăng nhập để bình luận.'
             ], 401);
         }
         return redirect()->route('user.login')->with('error', 'Vui lòng đăng nhập để bình luận.');
+    }
+
+    // Kiểm tra xem user đã mua sản phẩm trong đơn hàng đã hoàn thành chưa
+    $userModel = User::find($user['id']);
+    if (!$userModel || !$userModel->hasPurchasedProductInCompletedOrder($id)) {
+        if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Bạn chỉ có thể bình luận sản phẩm sau khi đã mua và nhận hàng thành công.'
+            ], 403);
+        }
+        return back()->with('error', 'Bạn chỉ có thể bình luận sản phẩm sau khi đã mua và nhận hàng thành công.');
     }
 
     $request->validate([
@@ -47,8 +60,8 @@ class ProductCommentController extends Controller
         'user_id'    => $user['id'],
     ]);
 
-    // Nếu là request AJAX, trả JSON để JS xử lý
-    if ($request->ajax()) {
+    // Nếu là request AJAX hoặc JSON, trả JSON để JS xử lý
+    if ($request->ajax() || $request->wantsJson() || $request->expectsJson()) {
         return response()->json([
             'status' => !$isViolated,
             'message' => $isViolated
