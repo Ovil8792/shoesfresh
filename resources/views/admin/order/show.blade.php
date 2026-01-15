@@ -102,7 +102,17 @@
 
                                     <span class="badge bg-{{ $paymentClass }}">{{ $paymentStatus }}</span>
                                     @if($st === 'cancelled' && $pm === 'VNPAY')
-                                        <br><small class="text-danger mt-2 d-block">⚠️ Đơn hàng đã hủy - Cần hoàn tiền cho khách hàng</small>
+                                        @if($order->refunded)
+                                            <br><small class="text-success mt-2 d-block">✅ Đã hoàn tiền</small>
+                                        @else
+                                            <br><small class="text-danger mt-2 d-block">⚠️ Đơn hàng đã hủy - Cần hoàn tiền cho khách hàng</small>
+                                            <form action="{{ route('order.markRefunded', $order->id) }}" method="POST" class="d-inline mt-2">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Xác nhận đã hoàn tiền cho khách hàng?')">
+                                                    <i class="bi bi-check-circle"></i> Đánh dấu đã hoàn tiền
+                                                </button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>

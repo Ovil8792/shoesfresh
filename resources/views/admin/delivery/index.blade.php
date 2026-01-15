@@ -9,7 +9,7 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Đóng"></button>
         </div>
     @endif
-    
+
     {{-- Thông báo lỗi --}}
     @if (session('error'))
         <div class="alert alert-danger alert-dismissible fade show text-center"

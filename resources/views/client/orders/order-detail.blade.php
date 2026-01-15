@@ -52,7 +52,7 @@
                         } elseif ($pm === 'VNPAY') {
                             $paymentLabel = 'VNPAY';
                             // Nếu thanh toán bằng VNPay, kể cả khi hủy vẫn hiển thị đã thanh toán
-                            $paymentStatus = 'Đã thanh toán';
+                                $paymentStatus = 'Đã thanh toán';
                             $showStatus = true;
                         } else {
                             $paymentLabel = $order->payment_method;

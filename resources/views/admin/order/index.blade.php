@@ -114,7 +114,11 @@
                                         @endphp
                                         <span class="badge bg-{{ $paymentClass }}">{{ $paymentStatus }}</span>
                                         @if($st === 'cancelled' && $pm === 'VNPAY')
-                                            <br><small class="text-danger">(Cần hoàn tiền)</small>
+                                            @if($item->refunded)
+                                                <br><small class="text-success">✅ Đã hoàn tiền</small>
+                                            @else
+                                                <br><small class="text-danger">⚠️ Cần hoàn tiền</small>
+                                            @endif
                                         @endif
                                     </td>
                                     <td>{{ $item->shipping_address }}</td>

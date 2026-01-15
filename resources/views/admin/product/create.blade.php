@@ -16,43 +16,58 @@
                 {{-- Hàng 1: Tên + Danh mục + Thương hiệu --}}
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label for="name" class="form-label">Tên sản phẩm</label>
+                        <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="name" name="name" required>
+                        @error('name')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="category_id" class="form-label">Danh mục</label>
+                        <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
                         <select class="form-select" id="category_id" name="category_id" required>
                             <option value="">-- Chọn danh mục --</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->name }}</option>
                             @endforeach
                         </select>
+                        @error('category_id')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="brand_id" class="form-label">Thương hiệu</label>
+                        <label for="brand_id" class="form-label">Thương hiệu <span class="text-danger">*</span></label>
                         <select class="form-select" id="brand_id" name="brand_id" required>
                             <option value="">-- Chọn thương hiệu --</option>
                             @foreach ($brands as $brand)
                                 <option value="{{ $brand->id }}">{{ $brand->name }}</option>
                             @endforeach
                         </select>
+                        @error('brand_id')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
                 {{-- Hàng 2: Giá + Ảnh + Trạng thái --}}
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
-                        <label for="price" class="form-label">Giá</label>
-                        <input type="number" class="form-control" id="price" name="price" required>
+                        <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control" id="price" name="price" min="1" step="1000" required>
+                        @error('price')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="image" class="form-label">Ảnh sản phẩm</label>
-                        <input type="file" class="form-control" id="image" name="image">
+                        <label for="image" class="form-label">Ảnh sản phẩm <span class="text-danger">*</span></label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
+                        @error('image')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
                         <label for="status" class="form-label">Trạng thái</label>
                         <select class="form-select" id="status" name="status">
-                            <option value="1">Hiển thị</option>
+                            <option value="1" selected>Hiển thị</option>
                             <option value="0">Ẩn</option>
                         </select>
                     </div>
@@ -79,7 +94,7 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <select name="variants[0][size_id]" class="form-select">
+                                    <select name="variants[0][size_id]" class="form-select" required>
                                         <option value="">-- Chọn kích cỡ --</option>
                                         @foreach ($sizes as $size)
                                             <option value="{{ $size->id }}">{{ $size->value }}</option>
@@ -87,7 +102,7 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <select name="variants[0][color_id]" class="form-select">
+                                    <select name="variants[0][color_id]" class="form-select" required>
                                         <option value="">-- Chọn màu --</option>
                                         @foreach ($colors as $color)
                                             <option value="{{ $color->id }}">{{ $color->name }}</option>
@@ -95,10 +110,10 @@
                                     </select>
                                 </td>
                                 <td>
-                                    <input type="number" name="variants[0][price]" class="form-control">
+                                    <input type="number" name="variants[0][price]" class="form-control" min="1" step="1000" required>
                                 </td>
                                 <td>
-                                    <input type="number" name="variants[0][stock]" class="form-control">
+                                    <input type="number" name="variants[0][stock]" class="form-control" min="0" required>
                                 </td>
                             </tr>
                         </tbody>
