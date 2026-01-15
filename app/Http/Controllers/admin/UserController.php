@@ -39,13 +39,34 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'name'      => 'required|string|max:255',
             'email'     => 'required|email|unique:users,email',
+            'password'  => 'required|string|min:6|confirmed',
             'phone'     => 'nullable|string|max:20',
+            'role_id'   => 'required|exists:roles,id',
+            'gender'    => 'nullable|in:male,female,other',
+            'birth_date'=> 'nullable|date',
+            'address'   => 'nullable|string|max:255',
+            'points'    => 'nullable|integer|min:0',
+            'tier'      => 'nullable|in:basic,premium',
         ], [
+            'name.required' => 'Tên tài khoản không được để trống.',
+            'name.max' => 'Tên tài khoản không được vượt quá 255 ký tự.',
             'email.unique' => 'Email đã tồn tại, vui lòng nhập email khác.',
             'email.required' => 'Email không được để trống.',
             'email.email' => 'Email không đúng định dạng.',
+            'password.required' => 'Mật khẩu không được để trống.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'role_id.required' => 'Vui lòng chọn vai trò.',
+            'role_id.exists' => 'Vai trò không hợp lệ.',
             'phone.max' => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'gender.in' => 'Giới tính không hợp lệ.',
+            'birth_date.date' => 'Ngày sinh không đúng định dạng.',
+            'address.max' => 'Địa chỉ không được vượt quá 255 ký tự.',
+            'points.integer' => 'Điểm thưởng phải là số nguyên.',
+            'points.min' => 'Điểm thưởng phải lớn hơn hoặc bằng 0.',
+            'tier.in' => 'Cấp độ thành viên không hợp lệ.',
         ]);
         User::create([
             'name'      => $request->name,
@@ -77,13 +98,33 @@ class UserController extends Controller
         $user = User::findOrFail($id);
 
         $request->validate([
-            'email' => 'required|email|unique:users,email,' . $user->id,
-            'phone' => 'nullable|string|max:20',
+            'name'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $user->id,
+            'password'  => 'nullable|string|min:6|confirmed',
+            'phone'     => 'nullable|string|max:20',
+            'role_id'   => 'required|exists:roles,id',
+            'gender'    => 'nullable|in:male,female,other',
+            'birth_date'=> 'nullable|date',
+            'address'   => 'nullable|string|max:255',
+            'points'    => 'nullable|integer|min:0',
+            'tier'      => 'nullable|in:basic,premium',
         ], [
+            'name.required' => 'Tên tài khoản không được để trống.',
+            'name.max' => 'Tên tài khoản không được vượt quá 255 ký tự.',
             'email.required' => 'Email không được để trống.',
             'email.email' => 'Email không đúng định dạng.',
             'email.unique' => 'Email đã tồn tại.',
+            'password.min' => 'Mật khẩu phải có ít nhất 6 ký tự.',
+            'password.confirmed' => 'Xác nhận mật khẩu không khớp.',
+            'role_id.required' => 'Vui lòng chọn vai trò.',
+            'role_id.exists' => 'Vai trò không hợp lệ.',
             'phone.max' => 'Số điện thoại không được vượt quá 20 ký tự.',
+            'gender.in' => 'Giới tính không hợp lệ.',
+            'birth_date.date' => 'Ngày sinh không đúng định dạng.',
+            'address.max' => 'Địa chỉ không được vượt quá 255 ký tự.',
+            'points.integer' => 'Điểm thưởng phải là số nguyên.',
+            'points.min' => 'Điểm thưởng phải lớn hơn hoặc bằng 0.',
+            'tier.in' => 'Cấp độ thành viên không hợp lệ.',
         ]);
 
         $data = $request->only([

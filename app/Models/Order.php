@@ -45,7 +45,8 @@ class Order extends Model
         'discount_applied',
         'status',
         'payment_method',
-        'shipping_address'
+        'shipping_address',
+        'refunded'
     ];
 
     protected $appends = ['status_label'];

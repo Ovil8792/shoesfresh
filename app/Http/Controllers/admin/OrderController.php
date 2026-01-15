@@ -158,4 +158,24 @@ class OrderController extends Controller
 
         return redirect()->route('order.index')->with('success', 'Đã xoá đơn hàng thành công.');
     }
+
+    public function markRefunded($id)
+    {
+        $order = Order::findOrFail($id);
+        
+        // Chỉ cho phép đánh dấu hoàn tiền cho đơn hàng đã hủy và thanh toán bằng VNPay
+        if ($order->status !== Order::STATUS_CANCELLED) {
+            return redirect()->back()->with('error', 'Chỉ có thể đánh dấu hoàn tiền cho đơn hàng đã hủy.');
+        }
+        
+        $pm = strtoupper((string) $order->payment_method);
+        if ($pm !== 'VNPAY') {
+            return redirect()->back()->with('error', 'Chỉ có thể hoàn tiền cho đơn hàng thanh toán bằng VNPay.');
+        }
+        
+        $order->refunded = true;
+        $order->save();
+        
+        return redirect()->back()->with('success', 'Đã đánh dấu hoàn tiền thành công!');
+    }
 }

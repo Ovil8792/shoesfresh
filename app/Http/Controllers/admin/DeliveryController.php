@@ -52,8 +52,8 @@ class DeliveryController extends Controller
         
         if (!$delivery->user_id) {
             $delivery->user_id = $adminId;
-            $delivery->status = 'accepted';
-            $delivery->save();
+        $delivery->status = 'accepted';
+        $delivery->save();
         }
         
         return redirect()->route('delivery.index')->with('success', 'Đơn hàng đã được nhận thành công.');

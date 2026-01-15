@@ -15,12 +15,15 @@
                 {{-- Hàng 1: Tên + Danh mục + Thương hiệu --}}
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label for="name" class="form-label">Tên sản phẩm</label>
+                        <label for="name" class="form-label">Tên sản phẩm <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="name" name="name"
                             value="{{ old('name', $product->name) }}" required>
+                        @error('name')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="category_id" class="form-label">Danh mục</label>
+                        <label for="category_id" class="form-label">Danh mục <span class="text-danger">*</span></label>
                         <select class="form-select" id="category_id" name="category_id" required>
                             <option value="">-- Chọn danh mục --</option>
                             @foreach ($categories as $category)
@@ -30,9 +33,12 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('category_id')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
-                        <label for="brand_id" class="form-label">Thương hiệu</label>
+                        <label for="brand_id" class="form-label">Thương hiệu <span class="text-danger">*</span></label>
                         <select class="form-select" id="brand_id" name="brand_id" required>
                             <option value="">-- Chọn thương hiệu --</option>
                             @foreach ($brands as $brand)
@@ -42,15 +48,21 @@
                                 </option>
                             @endforeach
                         </select>
+                        @error('brand_id')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
                 {{-- Hàng 2: Slug + Giá + Trạng thái --}}
                 <div class="row g-3 mt-2">
                     <div class="col-md-4">
-                        <label for="price" class="form-label">Giá</label>
+                        <label for="price" class="form-label">Giá <span class="text-danger">*</span></label>
                         <input type="number" class="form-control" id="price" name="price"
-                            value="{{ old('price', $product->price) }}" required>
+                            value="{{ old('price', $product->price) }}" min="1" step="1000" required>
+                        @error('price')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4">
                         <label for="image" class="form-label">Ảnh sản phẩm</label>

@@ -170,6 +170,7 @@ Route::prefix('admin')->group(function () {
             Route::get('show/{id}', [OrderController::class, 'show'])->name('order.show');
             Route::get('delete/{id}', [OrderController::class, 'delete'])->name('order.delete');
             Route::put('{id}/status', [OrderController::class, 'updateStatus'])->name('order.updateStatus');
+            Route::post('{id}/refund', [OrderController::class, 'markRefunded'])->name('order.markRefunded');
         });
         // Quản lý feedback
         Route::prefix('feedback')->group(function () {

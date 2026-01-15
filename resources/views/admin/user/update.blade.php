@@ -22,18 +22,27 @@
                     @method('POST')
 
                     <div class="mb-3">
-                        <label class="form-label">Tài Khoản</label>
-                        <input type="text" class="form-control" name="name" value="{{ $user->name }}" required>
+                        <label class="form-label">Tài Khoản <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="name" value="{{ old('name', $user->name) }}" required>
+                        @error('name')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Email</label>
-                        <input type="email" class="form-control" name="email" value="{{ $user->email }}" required>
+                        <label class="form-label">Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" name="email" value="{{ old('email', $user->email) }}" required>
+                        @error('email')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Mật khẩu mới</label>
+                        <label class="form-label">Mật khẩu mới <small class="text-muted">(Để trống nếu không đổi)</small></label>
                         <input type="password" class="form-control" name="password">
+                        @error('password')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
@@ -43,44 +52,71 @@
 
                     <div class="mb-3">
                         <label class="form-label">Số điện thoại</label>
-                        <input type="text" class="form-control" name="phone" value="{{ $user->phone }}">
+                        <input type="text" class="form-control" name="phone" value="{{ old('phone', $user->phone) }}">
+                        @error('phone')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Giới tính</label>
                         <select class="form-select" name="gender">
-                            <option value="male" @if($user->gender == 'male') selected @endif>Nam</option>
-                            <option value="female" @if($user->gender == 'female') selected @endif>Nữ</option>
-                            <option value="other" @if($user->gender == 'other') selected @endif>Khác</option>
+                            <option value="">-- Chọn giới tính --</option>
+                            <option value="male" {{ old('gender', $user->gender) == 'male' ? 'selected' : '' }}>Nam</option>
+                            <option value="female" {{ old('gender', $user->gender) == 'female' ? 'selected' : '' }}>Nữ</option>
+                            <option value="other" {{ old('gender', $user->gender) == 'other' ? 'selected' : '' }}>Khác</option>
                         </select>
+                        @error('gender')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Ngày sinh</label>
-                        <input type="date" class="form-control" name="birth_date" value="{{ $user->birth_date }}">
+                        <input type="date" class="form-control" name="birth_date" value="{{ old('birth_date', $user->birth_date) }}">
+                        @error('birth_date')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label">Địa chỉ</label>
-                        <input type="text" class="form-control" name="address" value="{{ $user->address }}">
+                        <input type="text" class="form-control" name="address" value="{{ old('address', $user->address) }}">
+                        @error('address')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Cấp độ</label>
+                        <label class="form-label">Điểm thưởng</label>
+                        <input type="number" class="form-control" name="points" value="{{ old('points', $user->points ?? 0) }}" min="0">
+                        @error('points')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Cấp độ thành viên</label>
                         <select class="form-select" name="tier">
-                            <option value="basic" @if($user->tier == 'basic') selected @endif>Basic</option>
-                            <option value="premium" @if($user->tier == 'premium') selected @endif>Premium</option>
+                            <option value="basic" {{ old('tier', $user->tier ?? 'basic') == 'basic' ? 'selected' : '' }}>Basic</option>
+                            <option value="premium" {{ old('tier', $user->tier) == 'premium' ? 'selected' : '' }}>Premium</option>
                         </select>
+                        @error('tier')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Vai trò</label>
-                        <select class="form-select" name="role_id">
-                            <option value="1" @if($user->role_id == 1) selected @endif>Quản trị viên</option>
-                            <option value="3" @if($user->role_id == 3) selected @endif>Nhân viên</option>
-                            <option value="2" @if($user->role_id == 2) selected @endif>Người dùng</option>
-                            <option value="4" @if($user->role_id == 4) selected @endif>Nhân viên giao hàng</option>
+                        <label class="form-label">Vai trò <span class="text-danger">*</span></label>
+                        <select class="form-select" name="role_id" required>
+                            <option value="">-- Chọn vai trò --</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->id }}" {{ old('role_id', $user->role_id) == $role->id ? 'selected' : '' }}>{{ $role->name ?? 'Vai trò ' . $role->id }}</option>
+                            @endforeach
                         </select>
+                        @error('role_id')
+                            <div class="text-danger small">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <div class="d-flex justify-content-between">
