@@ -365,15 +365,20 @@
             // Xử lý click vào size label
             document.querySelectorAll('.size-label').forEach(label => {
                 label.addEventListener('click', function(e) {
-                    if (e.target.tagName !== 'INPUT') {
-                        const checkbox = this.querySelector('input[type="checkbox"]');
-                        if (checkbox) {
-                            checkbox.checked = !checkbox.checked;
-                            if (checkbox.checked) {
-                                this.classList.add('active');
-                            } else {
-                                this.classList.remove('active');
-                            }
+                    e.preventDefault();
+                    const checkbox = this.querySelector('input[type="checkbox"]');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        if (checkbox.checked) {
+                            this.classList.add('active', 'bg-primary', 'text-white');
+                            this.classList.remove('bg-light', 'text-dark');
+                            this.style.borderColor = '#007bff';
+                            this.style.boxShadow = '0 0 0 3px rgba(0,123,255,0.25)';
+                        } else {
+                            this.classList.remove('active', 'bg-primary', 'text-white');
+                            this.classList.add('bg-light', 'text-dark');
+                            this.style.borderColor = '#ddd';
+                            this.style.boxShadow = 'none';
                         }
                     }
                 });

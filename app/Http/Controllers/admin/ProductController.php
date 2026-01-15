@@ -57,14 +57,14 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
             'brand_id' => 'required|exists:brands,id',
-            'price' => 'required|numeric|min:0',
+            'price' => 'required|numeric|min:1',
             'description' => 'nullable|string',
-            'status' => 'required|in:0,1',
-            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'status' => 'nullable|in:0,1',
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
             'variants' => 'required|array|min:1',
             'variants.*.size_id' => 'required|exists:sizes,id',
             'variants.*.color_id' => 'required|exists:colors,id',
-            'variants.*.price' => 'required|numeric|min:0',
+            'variants.*.price' => 'required|numeric|min:1',
             'variants.*.stock' => 'required|integer|min:0',
         ], [
             'name.required' => 'Tên sản phẩm không được để trống.',
@@ -72,12 +72,21 @@ class ProductController extends Controller
             'brand_id.required' => 'Vui lòng chọn thương hiệu.',
             'price.required' => 'Giá sản phẩm không được để trống.',
             'price.numeric' => 'Giá sản phẩm phải là số.',
-            'price.min' => 'Giá sản phẩm phải lớn hơn hoặc bằng 0.',
+            'price.min' => 'Giá sản phẩm phải lớn hơn 0.',
+            'image.required' => 'Vui lòng chọn ảnh sản phẩm.',
+            'image.image' => 'File phải là hình ảnh.',
+            'image.mimes' => 'Ảnh phải có định dạng: jpg, jpeg, png, gif.',
+            'image.max' => 'Kích thước ảnh không được vượt quá 2MB.',
             'variants.required' => 'Bạn phải thêm ít nhất một biến thể sản phẩm.',
+            'variants.min' => 'Bạn phải thêm ít nhất một biến thể sản phẩm.',
             'variants.*.size_id.required' => 'Vui lòng chọn kích cỡ cho biến thể.',
             'variants.*.color_id.required' => 'Vui lòng chọn màu sắc cho biến thể.',
             'variants.*.price.required' => 'Giá biến thể không được để trống.',
+            'variants.*.price.numeric' => 'Giá biến thể phải là số.',
+            'variants.*.price.min' => 'Giá biến thể phải lớn hơn 0.',
             'variants.*.stock.required' => 'Số lượng tồn kho không được để trống.',
+            'variants.*.stock.integer' => 'Số lượng tồn kho phải là số nguyên.',
+            'variants.*.stock.min' => 'Số lượng tồn kho phải lớn hơn hoặc bằng 0.',
         ]);
 
         DB::beginTransaction();
@@ -122,7 +131,7 @@ class ProductController extends Controller
                 'slug'        => $slug,
                 'price'       => $request->price,
                 'description' => $request->description,
-                'status'      => $request->status,
+                'status'      => $request->status ?? 1,
                 'thumbnail'   => $imagePath,
             ]);
 
@@ -150,7 +159,12 @@ class ProductController extends Controller
             return redirect()->route('product.index')->with('success', 'Thêm sản phẩm thành công');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->with('error', 'Đã xảy ra lỗi!');
+            \Log::error('Product store error: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['error' => 'Đã xảy ra lỗi: ' . $e->getMessage()])
+                ->with('error', 'Đã xảy ra lỗi khi thêm sản phẩm. Vui lòng kiểm tra lại thông tin.');
         }
     }
 
