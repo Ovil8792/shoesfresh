@@ -25,7 +25,7 @@ class VoucherController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = \Validator::make($request->all(), [
             'code' => 'required|string|max:255|unique:vouchers,code',
             'description' => 'nullable|string|max:255',
             'discount_type' => 'required|in:percent,fixed',
@@ -48,6 +48,16 @@ class VoucherController extends Controller
             'usage_limit.integer' => 'Số lượt sử dụng phải là số nguyên.',
             'usage_limit.min' => 'Số lượt sử dụng phải lớn hơn hoặc bằng 1.',
         ]);
+
+        if ($validator->fails()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
+
         Voucher::create([
                 'code' => $request->code,
                 'description' => $request->description,
@@ -60,6 +70,11 @@ class VoucherController extends Controller
                 'valid_from' => $request->valid_from,
                 'valid_to' => $request->valid_to,
             ]);
+        
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => 'Thêm thành công.']);
+        }
+        
         return redirect()->route('voucher.index')->with('success', 'Thêm thành công.');
     }
 

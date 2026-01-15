@@ -15,7 +15,7 @@
         }
         .stats-dashboard .cards {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 24px;
             margin-bottom: 24px;
         }
@@ -60,7 +60,7 @@
             margin-bottom: 4px;
             color: #334155;
         }
-        @media (max-width: 1200px) {
+        @media (max-width: 1000px) {
             .stats-dashboard .cards { grid-template-columns: repeat(2, 1fr); }
         }
         @media (max-width: 700px) {
@@ -104,10 +104,6 @@
             <div class="card">
                 <h3><svg fill="#a03d07" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 8h8v8H8z"/></svg>Tổng số đơn</h3>
                 <div class="value" id="totalOrders">{{ number_format($Orders) }}</div>
-            </div>
-            <div class="card">
-                <h3><svg fill="#a03d07" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a6 6 0 0 1 12 0v2"/></svg>Người dùng</h3>
-                <div class="value">{{ number_format($customers) }}</div>
             </div>
             <div class="card">
                 <h3><svg fill="#f59e42" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="#f59e42" stroke-width="2" fill="none"/><path d="M12 8v4l3 3" stroke="#f59e42" stroke-width="2" fill="none"/></svg>Đơn đang xử lý</h3>
