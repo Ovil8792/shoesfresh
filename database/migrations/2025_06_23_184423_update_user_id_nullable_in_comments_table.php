@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,13 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-    if (Schema::hasTable('feedback')) {
-    Schema::table('feedback', function (Blueprint $table) {
-        $table->dropForeign(['user_id']);
-        $table->unsignedBigInteger('user_id')->nullable(false)->change();
-        $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-    });
-}
+        if (Schema::hasTable('feedback')) {
+            Schema::table('feedback', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+            });
+            
+            DB::statement('ALTER TABLE `feedback` MODIFY `user_id` BIGINT UNSIGNED NOT NULL');
+            
+            Schema::table('feedback', function (Blueprint $table) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
     }
 
     /**
@@ -26,9 +31,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('feedback', function (Blueprint $table) {
-        $table->dropForeign(['user_id']);
-        $table->unsignedBigInteger('user_id')->nullable()->change();
-        $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
+            $table->dropForeign(['user_id']);
+        });
+        
+        DB::statement('ALTER TABLE `feedback` MODIFY `user_id` BIGINT UNSIGNED NULL');
+        
+        Schema::table('feedback', function (Blueprint $table) {
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
         });
     }
 };

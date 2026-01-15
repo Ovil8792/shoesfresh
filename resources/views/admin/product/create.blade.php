@@ -98,26 +98,7 @@
 
                 {{-- Biến thể sản phẩm --}}
                 <div class="mt-4">
-                    <label class="form-label">Biến thể sản phẩm <span class="text-danger">*</span></label>
-                    @error('variants')
-                        <div class="text-danger small mb-2">{{ $message }}</div>
-                    @enderror
-                    @if($errors->has('variants.*'))
-                        <div class="alert alert-danger small mb-2">
-                            <strong>Lỗi biến thể:</strong>
-                            <ul class="mb-0">
-                                @foreach($errors->get('variants.*') as $error)
-                                    @if(is_array($error))
-                                        @foreach($error as $e)
-                                            <li>{{ $e }}</li>
-                                        @endforeach
-                                    @else
-                                        <li>{{ $error }}</li>
-                                    @endif
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+                    <label class="form-label">Biến thể sản phẩm</label>
                     <table class="table table-bordered align-middle" id="variant-table">
                         <thead class="table-light">
                             <tr>
@@ -130,38 +111,26 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <select name="variants[0][size_id]" class="form-select" required>
+                                    <select name="variants[0][size_id]" class="form-select">
                                         <option value="">-- Chọn kích cỡ --</option>
                                         @foreach ($sizes as $size)
                                             <option value="{{ $size->id }}" {{ old('variants.0.size_id') == $size->id ? 'selected' : '' }}>{{ $size->value }}</option>
                                         @endforeach
                                     </select>
-                                    @error('variants.0.size_id')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
                                 </td>
                                 <td>
-                                    <select name="variants[0][color_id]" class="form-select" required>
+                                    <select name="variants[0][color_id]" class="form-select">
                                         <option value="">-- Chọn màu --</option>
                                         @foreach ($colors as $color)
                                             <option value="{{ $color->id }}" {{ old('variants.0.color_id') == $color->id ? 'selected' : '' }}>{{ $color->name }}</option>
                                         @endforeach
                                     </select>
-                                    @error('variants.0.color_id')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
                                 </td>
                                 <td>
-                                    <input type="number" name="variants[0][price]" class="form-control" min="1" step="1" value="{{ old('variants.0.price') }}" required>
-                                    @error('variants.0.price')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
+                                    <input type="number" name="variants[0][price]" class="form-control" min="1" step="1" value="{{ old('variants.0.price') }}">
                                 </td>
                                 <td>
-                                    <input type="number" name="variants[0][stock]" class="form-control" min="0" value="{{ old('variants.0.stock') }}" required>
-                                    @error('variants.0.stock')
-                                        <div class="text-danger small">{{ $message }}</div>
-                                    @enderror
+                                    <input type="number" name="variants[0][stock]" class="form-control" min="0" value="{{ old('variants.0.stock') }}">
                                 </td>
                             </tr>
                         </tbody>
@@ -204,7 +173,7 @@
                         </select>
                     </td>
                     <td>
-                        <input type="number" name="variants[${variantIndex}][price]" class="form-control" min="1" step="1" required>
+                        <input type="number" name="variants[${variantIndex}][price]" class="form-control" min="1" step="1">
                     </td>
                     <td>
                         <input type="number" name="variants[${variantIndex}][stock]" class="form-control">

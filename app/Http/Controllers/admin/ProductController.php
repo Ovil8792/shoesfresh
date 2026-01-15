@@ -61,11 +61,6 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'status' => 'nullable|in:0,1',
             'image' => 'required|image|mimes:jpg,jpeg,png,gif|max:2048',
-            'variants' => 'required|array|min:1',
-            'variants.*.size_id' => 'required|exists:sizes,id',
-            'variants.*.color_id' => 'required|exists:colors,id',
-            'variants.*.price' => 'required|numeric|min:1',
-            'variants.*.stock' => 'required|integer|min:0',
         ], [
             'name.required' => 'Tên sản phẩm không được để trống.',
             'category_id.required' => 'Vui lòng chọn danh mục.',
@@ -77,16 +72,6 @@ class ProductController extends Controller
             'image.image' => 'File phải là hình ảnh.',
             'image.mimes' => 'Ảnh phải có định dạng: jpg, jpeg, png, gif.',
             'image.max' => 'Kích thước ảnh không được vượt quá 2MB.',
-            'variants.required' => 'Bạn phải thêm ít nhất một biến thể sản phẩm.',
-            'variants.min' => 'Bạn phải thêm ít nhất một biến thể sản phẩm.',
-            'variants.*.size_id.required' => 'Vui lòng chọn kích cỡ cho biến thể.',
-            'variants.*.color_id.required' => 'Vui lòng chọn màu sắc cho biến thể.',
-            'variants.*.price.required' => 'Giá biến thể không được để trống.',
-            'variants.*.price.numeric' => 'Giá biến thể phải là số.',
-            'variants.*.price.min' => 'Giá biến thể phải lớn hơn 0.',
-            'variants.*.stock.required' => 'Số lượng tồn kho không được để trống.',
-            'variants.*.stock.integer' => 'Số lượng tồn kho phải là số nguyên.',
-            'variants.*.stock.min' => 'Số lượng tồn kho phải lớn hơn hoặc bằng 0.',
         ]);
 
         DB::beginTransaction();
@@ -98,22 +83,6 @@ class ProductController extends Controller
                 $imageName = time() . '_' . $image->getClientOriginalName();
                 $image->move(public_path('uploads/products/'), $imageName);
                 $imagePath = 'uploads/products/' . $imageName;
-            }
-
-            // Kiểm tra biến thể
-            $hasValidVariant = false;
-            if ($request->has('variants')) {
-                foreach ($request->variants as $variant) {
-                    if (!empty($variant['size_id']) && !empty($variant['color_id'])) {
-                        $hasValidVariant = true;
-                        break;
-                    }
-                }
-            }
-            if (!$hasValidVariant) {
-                return redirect()->back()
-                    ->withInput()
-                    ->withErrors(['variants' => 'Bạn phải thêm ít nhất một biến thể sản phẩm!']);
             }
 
             // Thêm mới sản phẩm
