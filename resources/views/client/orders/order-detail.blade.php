@@ -90,22 +90,95 @@
                             <th>Màu & Size</th>
                             <th>Số lượng</th>
                             <th>Giá</th>
+                            @if(isset($canComment) && $canComment)
+                            <th>Đánh giá & Bình luận</th>
+                            @endif
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($order->orderItems as $key => $item)
+                        @php
+                            $product = $item->variant->product ?? null;
+                            $productId = $product->id ?? null;
+                            $existingComment = isset($comments[$productId]) ? $comments[$productId]->first() : null;
+                            $existingReview = isset($reviews[$productId]) ? $reviews[$productId] : null;
+                        @endphp
                         <tr>
                             <td>{{ $key + 1 }}</td>
-                            <td>{{ $item->variant->product->name ?? '' }}</td>
+                            <td><a style="text-decoration: none; color: black;" href="{{ route('shop.product.show', ['name' => Str::slug($product->name), 'id' => $product->id]) }}">{{ $product->name ?? '' }}</a></td>
                             <td>
                                 @if($item->variant)
-                                    <span class="badge bg-secondary">Màu: {{ $item->variant->color->name ?? '' }}</span>
-                                    <span class="badge bg-secondary">Size: {{ $item->variant->size->value ?? '' }}</span>
+                                    <span class="badge bg-secondary" style="color: white;">Màu: {{ $item->variant->color->name ?? '' }}</span>
+                                    <span class="badge bg-secondary" style="color: white;">Size: {{ $item->variant->size->value ?? '' }}</span>
                                 @endif
                             </td>
                             <td>{{ $item->quantity }}</td>
                             <td>{{ number_format($item->price, 0, ',', '.') }} đ</td>
+                            @if(isset($canComment) && $canComment && $productId)
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="collapse" 
+                                    data-bs-target="#commentSection{{ $productId }}" aria-expanded="false">
+                                    <i class="fa fa-comment"></i> Đánh giá & Bình luận
+                                </button>
+                            </td>
+                            @endif
                         </tr>
+                        @if(isset($canComment) && $canComment && $productId)
+                        <tr>
+                            <td colspan="6" class="p-0 border-0">
+                                <div class="collapse" id="commentSection{{ $productId }}">
+                                    <div class="card card-body bg-light m-3">
+                                        <h6 class="mb-3">
+                                            <i class="fa fa-star text-warning"></i> Đánh giá sản phẩm: {{ $product->name }}
+                                        </h6>
+                                        
+                                        {{-- Form đánh giá sao --}}
+                                        <div class="mb-3">
+                                            <label class="form-label">Đánh giá:</label>
+                                            <div id="ratingSection{{ $productId }}" style="font-size: 20px;">
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    <i class="fa fa-star-o star-rating" 
+                                                       data-product-id="{{ $productId }}" 
+                                                       data-rating="{{ $i }}"
+                                                       style="cursor: pointer; color: #ffc107;"></i>
+                                                @endfor
+                                                <span id="ratingText{{ $productId }}" class="ms-2 text-muted"></span>
+                                            </div>
+                                            <input type="hidden" id="ratingInput{{ $productId }}" 
+                                                   value="{{ $existingReview->rating ?? '' }}">
+                                        </div>
+                                        
+                                        {{-- Form bình luận --}}
+                                        <form id="commentForm{{ $productId }}" class="comment-form" 
+                                              data-product-id="{{ $productId }}"
+                                              data-comment-url="{{ route('product.comment.store', $productId) }}"
+                                              data-review-url="{{ route('shop.submitReview', $productId) }}">
+                                            @csrf
+                                            <div class="mb-2">
+                                                <label for="commentText{{ $productId }}" class="form-label">Bình luận:</label>
+                                                <textarea class="form-control" id="commentText{{ $productId }}" 
+                                                          name="cmt" rows="3" 
+                                                          placeholder="Chia sẻ cảm nhận của bạn về sản phẩm...">{{ $existingComment->cmt ?? '' }}</textarea>
+                                            </div>
+                                            <div id="commentMessage{{ $productId }}" class="mb-2"></div>
+                                            <button type="submit" class="btn btn-primary btn-sm">
+                                                <i class="fa fa-paper-plane"></i> Gửi bình luận
+                                            </button>
+                                        </form>
+                                        
+                                        {{-- Hiển thị bình luận đã gửi --}}
+                                        @if($existingComment)
+                                        <div class="mt-3 p-2 bg-white rounded border">
+                                            <small class="text-muted">Bình luận của bạn:</small>
+                                            <p class="mb-0 mt-1">{{ $existingComment->cmt }}</p>
+                                            <small class="text-muted">{{ $existingComment->created_at->format('d/m/Y H:i') }}</small>
+                                        </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        @endif
                         @endforeach
                     </tbody>
                 </table>
@@ -157,6 +230,159 @@ document.addEventListener('DOMContentLoaded', function () {
             modal.style.display = 'none';
         });
     }
+
+    // Xử lý đánh giá sao
+    document.querySelectorAll('.star-rating').forEach(star => {
+        star.addEventListener('click', function() {
+            const productId = this.dataset.productId;
+            const rating = parseInt(this.dataset.rating);
+            const ratingInput = document.getElementById('ratingInput' + productId);
+            const ratingText = document.getElementById('ratingText' + productId);
+            
+            // Cập nhật input
+            ratingInput.value = rating;
+            
+            // Cập nhật hiển thị sao
+            const stars = document.querySelectorAll(`[data-product-id="${productId}"].star-rating`);
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('fa-star-o');
+                    s.classList.add('fa-star');
+                } else {
+                    s.classList.remove('fa-star');
+                    s.classList.add('fa-star-o');
+                }
+            });
+            
+            // Cập nhật text
+            ratingText.textContent = rating + '/5';
+            
+            // Lấy URL từ form
+            const form = document.getElementById('commentForm' + productId);
+            const reviewUrl = form ? form.dataset.reviewUrl : `/shop/product/${productId}/review`;
+            
+            // Gửi đánh giá
+            fetch(reviewUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ rating: rating })
+            })
+            .then(async (response) => {
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+                const payload = isJson ? await response.json() : await response.text();
+
+                if (!response.ok) {
+                    const message = isJson
+                        ? (payload && payload.message ? payload.message : 'Không thể gửi đánh giá.')
+                        : 'Không thể gửi đánh giá (server trả về HTML - kiểm tra lại route).';
+                    throw new Error(message);
+                }
+
+                if (!isJson) {
+                    throw new Error('Không thể gửi đánh giá (server trả về HTML - kiểm tra lại route).');
+                }
+
+                return payload;
+            })
+            .then(data => {
+                if (data.success) {
+                    const messageDiv = document.getElementById('commentMessage' + productId);
+                    messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show"><small>Đánh giá đã được lưu!</small><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                    setTimeout(() => {
+                        messageDiv.innerHTML = '';
+                    }, 3000);
+                }
+            })
+            .catch(error => {
+                const messageDiv = document.getElementById('commentMessage' + productId);
+                messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show"><small>' + error.message + '</small><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            });
+        });
+    });
+
+    // Khởi tạo sao đã đánh giá
+    document.querySelectorAll('[id^="ratingInput"]').forEach(input => {
+        const productId = input.id.replace('ratingInput', '');
+        const rating = parseInt(input.value);
+        if (rating) {
+            const stars = document.querySelectorAll(`[data-product-id="${productId}"].star-rating`);
+            const ratingText = document.getElementById('ratingText' + productId);
+            stars.forEach((s, index) => {
+                if (index < rating) {
+                    s.classList.remove('fa-star-o');
+                    s.classList.add('fa-star');
+                }
+            });
+            if (ratingText) {
+                ratingText.textContent = rating + '/5';
+            }
+        }
+    });
+
+    // Xử lý form bình luận
+    document.querySelectorAll('.comment-form').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const productId = this.dataset.productId;
+            const commentUrl = this.dataset.commentUrl || `/shop/comment/${productId}`;
+            const formData = new FormData(this);
+            const messageDiv = document.getElementById('commentMessage' + productId);
+            
+            messageDiv.innerHTML = '<div class="alert alert-info"><small>Đang gửi...</small></div>';
+            
+            fetch(commentUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(async (response) => {
+                const contentType = response.headers.get('content-type') || '';
+                const isJson = contentType.includes('application/json');
+                const payload = isJson ? await response.json() : await response.text();
+
+                if (!response.ok) {
+                    const message = isJson
+                        ? (payload && payload.message ? payload.message : 'Không thể gửi bình luận.')
+                        : 'Không thể gửi bình luận (server trả về HTML - kiểm tra lại route).';
+                    throw new Error(message);
+                }
+
+                if (!isJson) {
+                    throw new Error('Không thể gửi bình luận (server trả về HTML - kiểm tra lại route).');
+                }
+
+                return payload;
+            })
+            .then(data => {
+                if (data.status) {
+                    messageDiv.innerHTML = '<div class="alert alert-success alert-dismissible fade show"><small>' + data.message + '</small><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                    if (data.comment) {
+                        // Reload trang sau 1 giây để hiển thị bình luận mới
+                        setTimeout(() => {
+                            location.reload();
+                        }, 1000);
+                    } else {
+                        setTimeout(() => {
+                            messageDiv.innerHTML = '';
+                        }, 3000);
+                    }
+                } else {
+                    messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show"><small>' + data.message + '</small><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+                }
+            })
+            .catch(error => {
+                messageDiv.innerHTML = '<div class="alert alert-danger alert-dismissible fade show"><small>' + error.message + '</small><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+            });
+        });
+    });
 });
 </script>
 
@@ -288,6 +514,35 @@ document.addEventListener('DOMContentLoaded', function () {
 .btn-cancel:hover {
     background-color: #dc3545;
     color: white;
+}
+
+/* Comment Section Styles */
+.comment-form {
+    margin-top: 15px;
+}
+
+.star-rating {
+    transition: all 0.2s;
+}
+
+.star-rating:hover {
+    transform: scale(1.2);
+}
+
+#ratingSection .fa-star {
+    color: #ffc107;
+}
+
+#ratingSection .fa-star-o {
+    color: #ddd;
+}
+
+.collapse {
+    transition: all 0.3s ease;
+}
+
+.card-body.bg-light {
+    border-left: 3px solid #0d6efd;
 }
 </style>
 @endsection

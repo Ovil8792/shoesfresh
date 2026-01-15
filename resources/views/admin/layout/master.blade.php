@@ -38,13 +38,11 @@
 <body class="admin-shell">
     <div class="admin-app" id="adminApp" data-base-url="{{ url('/') }}">
         <aside class="admin-sidebar" id="adminSidebar">
-            <div class="brand-area">
-                <div class="brand-badge">ShoesFresh</div>
-                <div class="brand-label">
-                    <span>ShoesFresh</span>
-                    <small>Admin Control</small>
-                        </div>
+        <div class="brand-area" style="margin-bottom: 0 !important;">
+                        <img width="90%" src="{{ asset('img/logo3.png') }}" alt="ShoesFresh">
                     </div>
+                    <p class="nav-card__desc text-center">Admin Control</p>
+
 
             @if ($admin)
                 <div class="account-summary">
@@ -58,7 +56,6 @@
                     <section class="nav-card">
                         <header class="nav-card__head">
                             <span class="nav-card__title">Điều hướng chính</span>
-                            <p class="nav-card__desc">Các bảng điều khiển vận hành cốt lõi.</p>
                         </header>
                         <ul class="nav-list nav-list--grid">
                             <li class="nav-item {{ $isActive(['admin/stastic']) ? 'active' : '' }}">
@@ -97,7 +94,6 @@
                     <section class="nav-card">
                         <header class="nav-card__head">
                             <span class="nav-card__title">Sản phẩm</span>
-                            <p class="nav-card__desc">Toàn bộ cấu trúc và thuộc tính sản phẩm.</p>
                         </header>
                         <ul class="nav-list nav-list--grid">
                             <li class="nav-item {{ $isActive(['admin/category*']) ? 'active' : '' }}">
@@ -152,7 +148,6 @@
                     <section class="nav-card">
                         <header class="nav-card__head">
                             <span class="nav-card__title">Marketing & Nội dung</span>
-                            <p class="nav-card__desc">Kết nối khách hàng qua khuyến mãi và bài viết.</p>
                         </header>
                         <ul class="nav-list nav-list--grid">
                             <li class="nav-item {{ $isActive(['admin/voucher*']) ? 'active' : '' }}">
@@ -191,7 +186,6 @@
                     <section class="nav-card">
                         <header class="nav-card__head">
                             <span class="nav-card__title">Tác vụ giao vận</span>
-                            <p class="nav-card__desc">Theo dõi tuyến giao hàng và trạng thái đơn.</p>
                         </header>
                         <ul class="nav-list">
                             <li class="nav-item {{ $isActive(['admin/delivery*']) ? 'active' : '' }}">
@@ -206,7 +200,6 @@
                     <section class="nav-card">
                         <header class="nav-card__head">
                             <span class="nav-card__title">Điểm bán</span>
-                            <p class="nav-card__desc">Thao tác xuất bán tại quầy.</p>
                         </header>
                         <ul class="nav-list">
                             <li class="nav-item {{ $isActive(['pos', 'pos/*']) ? 'active' : '' }}">
@@ -222,7 +215,6 @@
                 <section class="nav-card">
                     <header class="nav-card__head">
                         <span class="nav-card__title">Hệ thống</span>
-                        <p class="nav-card__desc">Hành động nhanh cho tài khoản của bạn.</p>
                     </header>
                     <ul class="nav-list">
                         <li class="nav-item">

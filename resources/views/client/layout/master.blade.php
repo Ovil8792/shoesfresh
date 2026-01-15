@@ -30,7 +30,7 @@
             font-size: 16px;
             color: #111827;
             background: #fff3e6; /* Light orange background */
-            padding-top: 120px;
+            padding-top: 158px; /* Adjusted for hotline bar + header */
         }
 
         /* Nút (Buttons) */
@@ -90,11 +90,112 @@
             border-radius: 4px;
         }
 
+        /* Hotline Bar */
+        .hotline-bar {
+            background-color: #ffffff;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 9px 0;
+            font-size: 13px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1001;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .hotline-bar__left,
+        .hotline-bar__right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hotline-bar__left {
+            justify-content: flex-start;
+        }
+
+        .hotline-bar__right {
+            justify-content: flex-end;
+        }
+
+        .hotline-text {
+            color: #111827;
+            font-weight: 400;
+        }
+
+        .hotline-text strong {
+            color: #f97316;
+            font-weight: 600;
+        }
+
+        .hotline-text i {
+            color: #f97316;
+            margin-right: 5px;
+        }
+
+        .hotline-link {
+            color: #111827;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-weight: 400;
+        }
+
+        .hotline-link:hover {
+            color: #f97316;
+            text-decoration: none;
+        }
+
+        .hotline-separator {
+            color: #d1d5db;
+            margin: 0 5px;
+        }
+
+        .language-selector {
+            display: inline-block;
+        }
+
+        /* Responsive for Hotline Bar */
+        @media (max-width: 768px) {
+            .hotline-bar {
+                font-size: 11px;
+                padding: 6px 0;
+            }
+
+            .hotline-bar__left,
+            .hotline-bar__right {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .hotline-separator {
+                display: none;
+            }
+
+            .hotline-bar__right {
+                justify-content: flex-start;
+                margin-top: 5px;
+            }
+
+            body {
+                padding-top: 140px; /* Adjusted for mobile */
+            }
+
+            .header {
+                top: 0;
+            }
+
+            .hotline-bar {
+                position: relative;
+                z-index: 1001;
+            }
+        }
+
         /* Header */
         .header {
             border-bottom: 0.1px solid #ffffff;
             position: fixed;
-            top: 0;
+            top: 38px;
             left: 0;
             width: 100%;
             z-index: 1000;
@@ -425,7 +526,38 @@
     </div>
     <!-- End Mobile Menu -->
 
+    <!-- Hotline Bar -->
+    <div class="hotline-bar">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="hotline-bar__left">
+                        <span class="hotline-text">
+                            <i class="fa fa-phone"></i> Hotline: <strong>0865091023</strong> (8h - 21h30)
+                        </span>
+                        <span class="hotline-separator">|</span>
+                        <a href="{{ route('shop.contact.index') }}" class="hotline-link">Liên hệ hợp tác</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="hotline-bar__right">
+                        <a href="{{ route('shop.contact.index') }}" class="hotline-link">Tìm cửa hàng</a>
+                        <span class="hotline-separator">|</span>
+                        <a href="{{ route('profile.orders') }}" class="hotline-link">Kiểm tra đơn hàng</a>
+                        <span class="hotline-separator">|</span>
+                        <div class="language-selector">
+                            <span class="hotline-link">VN</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Hotline Bar -->
+
     <!-- Desktop Header -->
+
+
     <header class="header">
         <div class="container">
             <div class="row">
@@ -435,7 +567,7 @@
                     </div>
                 </div>
                 <div class="col-lg-7 col-md-6">
-                    <nav class="header__menu">
+                    <nav class="header__menu d-flex justify-content-center">
                         <ul>
                             <li><a href="{{ url('/') }}">Trang chủ</a></li>
                             <li><a href="{{ url('/shop') }}">Sản phẩm</a></li>
@@ -447,7 +579,7 @@
                                     <li><a href="{{ url('/blog-details') }}">Chi tiết tin tức</a></li>
                                 </ul>
                             </li> --}}
-                            <li><a href="{{ url('/blog') }}">Sản phẩm giảm giá</a></li>
+                            <!-- <li><a href="{{ url('/blog') }}">Sản phẩm giảm giá</a></li> -->
                             <li><a href="{{ route('shop.contact.index') }}">Liên hệ</a></li>
                         </ul>
                     </nav>
@@ -510,9 +642,9 @@
                                     alt="Logo"></a>
                         </div>
                         <ul>
-                            <li>Địa chỉ: 60-49 Road 11378 New York</li>
-                            <li>Điện thoại: +65 11.188.888</li>
-                            <li>Email: hello@colorlib.com</li>
+                            <li>Địa chỉ: 127 Lê Thánh Tông, Ngô Quyền, Hải Phòng</li>
+                            <li>Điện thoại: 0865091023</li>
+                            <li>Email: tamuon00@gmail.com</li>
                         </ul>
                     </div>
                 </div>
@@ -562,9 +694,7 @@
                                 Copyright &copy;
                                 <script>
                                     document.write(new Date().getFullYear());
-                                </script> All rights reserved | This
-                                template is made with <i class="fa fa-heart" aria-hidden="true"></i> by <a
-                                    href="https://colorlib.com" target="_blank">Colorlib</a>
+                                </script> All rights reserved 
                             </p>
                         </div>
                         <div class="footer__copyright__payment">

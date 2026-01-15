@@ -15,11 +15,11 @@
     @endif
     <section class="checkout spad">
         <div class="container">
-            <div class="row">
+            <!-- <div class="row">
                 <div class="col-lg-12">
                     <h6><span class="icon_tag_alt"></span> Bạn có mã giảm giá? <a href="#">Nhập mã tại đây</a></h6>
                 </div>
-            </div>
+            </div> -->
             <div class="checkout__form">
                 <h4>Thông tin giao hàng</h4>
                 <form id="checkout-form" action="{{ route('checkout.submit') }}" method="POST">

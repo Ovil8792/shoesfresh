@@ -12,8 +12,8 @@
         </div>
     @endif
 
-    <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="{{ asset('img/br2.jpg') }}">
+
+    <!-- <section class="breadcrumb-section set-bg" data-setbg="{{ asset('img/br2.jpg') }}">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -28,7 +28,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
     <!-- Breadcrumb Section End -->
 
     <!-- Product Details Section Begin -->
@@ -182,49 +182,72 @@
                                 <h5>Nhận xét của bạn</h5>
                                 {{-- dùng từ đây --}}
                                 @if (session('user'))
-                                    <div class="row">
-                                        {{-- bình luận --}}
-                                        <div class="col-md-12">
+                                    @if (isset($canCommentReview) && $canCommentReview)
+                                        <div class="row">
+                                            {{-- bình luận --}}
+                                            <div class="col-md-12">
                                             @if (session('user'))
-                                                <form id="starRatingForm" method="POST">
-                                                    @csrf
-                                                    <div class="form-group mb-2">
-                                                        <div id="interactiveRating" style="font-size: 24px;">
-                                                            @for ($i = 1; $i <= 5; $i++)
-                                                                <i class="fa fa-star-o star"
-                                                                    data-value="{{ $i }}"></i>
-                                                            @endfor
+                                                @if (isset($canCommentReview) && $canCommentReview)
+                                                    <form id="starRatingForm" method="POST">
+                                                        @csrf
+                                                        <div class="form-group mb-2">
+                                                            <div id="interactiveRating" style="font-size: 24px;">
+                                                                @for ($i = 1; $i <= 5; $i++)
+                                                                    <i class="fa fa-star-o star"
+                                                                        data-value="{{ $i }}"></i>
+                                                                @endfor
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                    <input type="hidden" name="rating" id="ratingInput"
-                                                        value="{{ $existingRating ?? '' }}">
-                                                </form>
+                                                        <input type="hidden" name="rating" id="ratingInput"
+                                                            value="{{ $existingRating ?? '' }}">
+                                                    </form>
+                                                @else
+                                                    <p class="text-muted">
+                                                        <i class="fa fa-info-circle"></i> Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.
+                                                    </p>
+                                                @endif
                                             @else
                                                 <p>Vui lòng <a href="{{ route('user.login') }}">đăng nhập</a> để đánh giá.
                                                 </p>
                                             @endif
-                                            @if (session('success'))
-                                                <div class="alert alert-warning alert-dismissible fade show"
-                                                    role="alert">
-                                                    {{ session('success') }}
-                                                    <button type="button" class="close" data-dismiss="alert"
-                                                        aria-label="Đóng">
-                                                        <span aria-hidden="true">&times;</span>
-                                                    </button>
-                                                </div>
-                                            @endif
-                                            <form action="{{ route('product.comment.store', $product->id) }}"
-                                                method="POST" class="mb-4">
-                                                @csrf
-                                                <div class="form-group">
-                                                    <label for="cmt">Bình luận</label>
-                                                    <textarea class="form-control" name="cmt" rows="3" required></textarea>
-                                                </div>
-                                                <button type="submit" class="primary-btn mr-2"
-                                                    style="background-color: rgb(121, 121, 250)">Gửi bình luận</button>
-                                            </form>
+                                                @if (session('success'))
+                                                    <div class="alert alert-success alert-dismissible fade show"
+                                                        role="alert">
+                                                        {{ session('success') }}
+                                                        <button type="button" class="close" data-dismiss="alert"
+                                                            aria-label="Đóng">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                                @if (session('error'))
+                                                    <div class="alert alert-danger alert-dismissible fade show"
+                                                        role="alert">
+                                                        {{ session('error') }}
+                                                        <button type="button" class="close" data-dismiss="alert"
+                                                            aria-label="Đóng">
+                                                            <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                    </div>
+                                                @endif
+                                                <form id="commentForm" action="{{ route('product.comment.store', $product->id) }}"
+                                                    method="POST" class="mb-4">
+                                                    @csrf
+                                                    <div id="comment-message"></div>
+                                                    <div class="form-group">
+                                                        <label for="cmt">Bình luận</label>
+                                                        <textarea class="form-control" name="cmt" rows="3" required></textarea>
+                                                    </div>
+                                                    <button type="submit" class="primary-btn mr-2"
+                                                        style="background-color: rgb(121, 121, 250)">Gửi bình luận</button>
+                                                </form>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @else
+                                        <div class="alert alert-info">
+                                            <i class="fa fa-info-circle"></i> Bạn chỉ có thể bình luận và đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.
+                                        </div>
+                                    @endif
                                 @else
                                     <p>Vui lòng <a href="{{ route('user.login') }}">đăng nhập</a> để bình luận hoặc đánh
                                         giá.</p>
@@ -517,7 +540,14 @@
                                 rating
                             })
                         })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw new Error(data.message || 'Không thể gửi đánh giá.');
+                                });
+                            }
+                            return response.json();
+                        })
                         .then(data => {
                             if (data.success) {
                                 alert('Đánh giá của bạn đã được lưu!');
@@ -548,7 +578,7 @@
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Có lỗi xảy ra, vui lòng thử lại.');
+                            alert(error.message || 'Có lỗi xảy ra, vui lòng thử lại.');
                         });
                 });
             });
